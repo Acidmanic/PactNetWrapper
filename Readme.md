@@ -41,6 +41,13 @@ Or by directly adding reference to .csproj file:
 
 ```
 
+ 
+| __Important Note__ |
+| :--- |
+| pact-net package wraps the ruby version of pact and when using it and you need to reference its package regarding the platform your tests are running at. So for example 
+  in my case, which i run my tests on a 64 bit linux, i add   ```<PackageReference Include="PactNet.Linux.x64" Version="3.0.0" />``` reference alongside the ```<PackageReference Include="Pact.Provider.Wrapper" />``` reference in my csproj file (or via package manager and etc.). Other platforms can be __PactNet.Windows__, __PactNet.Linux.x86__ and __PactNet.OSX__ |
+   
+   
 Examples
 ================
  
