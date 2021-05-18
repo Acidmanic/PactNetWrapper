@@ -5,7 +5,7 @@ namespace Pact.Provider.Wrapper.PactnetVerificationPublish
     public interface IPactnetVerificationPublish
     {
         /// <summary>
-        /// Here it van intercept the pact model for example change the _links values, before verification happens.
+        /// Here it can intercept the pact model for example change the _links values, before verification happens.
         /// It can also determine if result will be published by via Pactnet broker or not by returning true
         /// or false.
         /// </summary>
