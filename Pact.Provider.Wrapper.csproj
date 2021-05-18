@@ -2,10 +2,29 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Mani Moayedi</Authors>
+    <Version>1.0.0</Version>
+    <Company>Acidmanic</Company>
+    <PackageIcon>graphics\pactnet-wrapper.png</PackageIcon>
+    <Description>Perform Pact tests centeralized and per interaction. Publish results per endpoint and to any server or documentation tool. </Description>
+    <Summary>Add package, Create test bench, start application, call Verify method.</Summary>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="PactNet" Version="2.6.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- NuGet -->
+    <None Include="Graphics\pactnet-wrapper.png">
+      <Pack>true</Pack>
+      <PackagePath>\graphics</PackagePath>
+    </None>
+    <None Include="LICENSE.txt">
+      <Pack>true</Pack>
+      <PackagePath>LICENSE.txt</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
