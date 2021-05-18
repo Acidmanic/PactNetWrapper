@@ -13,11 +13,7 @@ namespace Pact.Provider.Wrapper.Verification
 {
     public class PactVerificationBench
     {
-        private readonly IInteractionTagger _tagger;
-
-        private readonly string _verificationResultBrokerLink;
         private readonly string _serviceUri;
-        private readonly bool _publishResultViaPactNet;
         private BatchVerificationPublisher _publisher;
 
         public IPactnetVerificationPublish PactnetVerificationPublish { get; set; }
@@ -100,8 +96,8 @@ namespace Pact.Provider.Wrapper.Verification
 
                     new Json().Save(fileName, ep.Value);
 
-                    var verificationRecord = VerifyAgainst(fileName,publishResultViaBroker,
-                        ep.Value,runningInteraction);
+                    var verificationRecord = VerifyAgainst(fileName, publishResultViaBroker,
+                        ep.Value, runningInteraction);
 
                     verificationRecords.Add(verificationRecord);
 
@@ -117,8 +113,8 @@ namespace Pact.Provider.Wrapper.Verification
             }
         }
 
-        private VerificationRecord VerifyAgainst(string pactFile, 
-            bool publishResultViaBroker, Models.Pact runningPact,Interaction runningInteraction)
+        private VerificationRecord VerifyAgainst(string pactFile,
+            bool publishResultViaBroker, Models.Pact runningPact, Interaction runningInteraction)
         {
             var verifierConfig = new PactVerifierConfig
             {
@@ -132,8 +128,8 @@ namespace Pact.Provider.Wrapper.Verification
 
             verifier.PactUri(pactFile);
 
-            VerificationRecord record = new VerificationRecord().UpdateFrom(runningPact,runningInteraction);
-            
+            VerificationRecord record = new VerificationRecord().UpdateFrom(runningPact, runningInteraction);
+
             try
             {
                 verifier.Verify();
@@ -146,6 +142,7 @@ namespace Pact.Provider.Wrapper.Verification
 
                 record.Exception = e;
             }
+
             return record;
         }
 
