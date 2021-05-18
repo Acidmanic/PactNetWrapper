@@ -18,8 +18,31 @@ This library
 
 In my case, i publish the results to a badge server and i use these badges in my api wiki, so any team member can have see the state of implementation of apis at the api wiki.
 
- Examples
- ================
+Get the library
+===============
+
+This library is available on [NuGet.org](https://www.nuget.org/packages/Pact.Provider.Wrapper/), so you can add library to your dotnet core application via .Net Cli using:
+
+```bash 
+	dotnet add package Pact.Provider.Wrapper 
+
+```
+
+Or Visualstudio Package Manager, using 
+
+```bash 
+	Install-Package Pact.Provider.Wrapper 
+
+```
+Or by directly adding reference to .csproj file:
+
+```xml
+	<PackageReference Include="Pact.Provider.Wrapper" />
+
+```
+
+Examples
+================
  
  Without publishing the results
  ------------
