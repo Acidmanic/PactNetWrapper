@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PactNet.Linux.x64" Version="2.6.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Pact.Provider.Wrapper, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\Pact.Provider.Wrapper.Tests\bin\Debug\netcoreapp3.1\Pact.Provider.Wrapper.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
