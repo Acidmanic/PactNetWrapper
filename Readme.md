@@ -1,4 +1,6 @@
 
+![Avatar](Graphics/pactnet-wrapper.png)
+
 About
 =============
 
