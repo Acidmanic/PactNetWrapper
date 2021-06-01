@@ -1,9 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using Pact.Provider.Wrapper.IO;
 using Pact.Provider.Wrapper.Models;
 using Pact.Provider.Wrapper.PactnetVerificationPublish;
+using Pact.Provider.Wrapper.Reflection;
+using Pact.Provider.Wrapper.Unit;
 using Pact.Provider.Wrapper.Validation;
 using Pact.Provider.Wrapper.Verification.Publishers;
 using PactNet;
@@ -18,8 +23,7 @@ namespace Pact.Provider.Wrapper.Verification
 
         public IPactnetVerificationPublish PactnetVerificationPublish { get; set; }
 
-        public PactVerificationBench(string serviceUri
-        )
+        public PactVerificationBench(string serviceUri)
         {
             this._serviceUri = serviceUri;
             this.PactnetVerificationPublish = new NullPactnetVerificationPublish();
@@ -81,7 +85,9 @@ namespace Pact.Provider.Wrapper.Verification
         {
             var splitPacts = pact.SplitByEndpoint();
 
-            foreach (var ep in splitPacts)
+            var selectedToTestEndpoints = PickSelectedEndpoints(splitPacts);
+
+            foreach (var ep in selectedToTestEndpoints)
             {
                 var interactions = ep.Value.Interactions;
 
@@ -111,6 +117,59 @@ namespace Pact.Provider.Wrapper.Verification
                     }
                 }
             }
+        }
+
+        private Dictionary<string, Models.Pact> PickSelectedEndpoints(Dictionary<string, Models.Pact> byEndpoints)
+        {
+            var skipAll = new AttributeHelper().DeliveredAttributes<SkipAllEndpointsAttribute>();
+
+            if (skipAll.Count > 0)
+            {
+                return new Dictionary<string, Models.Pact>();
+            }
+
+            var addEndpoints =
+                new AttributeHelper().DeliveredAttributes<EndpointAttribute>()
+                    .Select(ep => ep.RequestPath.NormalizeHttpUri().ToLower()).ToList();
+
+            var selected = new Dictionary<string, Models.Pact>();
+
+            foreach (var keyValuePair in byEndpoints)
+            {
+                if (addEndpoints.Count == 0 || IsLabeled(keyValuePair.Key, addEndpoints))
+                {
+                    selected.Add(keyValuePair.Key, keyValuePair.Value);
+                }
+            }
+
+            var skipEndpoints = new AttributeHelper().DeliveredAttributes<SkipEndpointAttribute>()
+                .Select(ep => ep.RequestPath.NormalizeHttpUri().ToLower()).ToList();
+
+            var removingKeys = new List<string>();
+            
+            foreach (var keyValuePair in selected)
+            {
+                var key = keyValuePair.Key.NormalizeHttpUri().ToLower();
+
+                if (skipEndpoints.Contains(key))
+                {
+                    removingKeys.Add(keyValuePair.Key);
+                }
+            }
+            
+            foreach (var removingKey in removingKeys)
+            {
+                selected.Remove(removingKey);
+            }
+
+            return selected;
+        }
+
+        private bool IsLabeled(string endpoint, List<string> labeledEndpoints)
+        {
+            var key = endpoint.NormalizeHttpUri().ToLower();
+
+            return labeledEndpoints.Count == 0 || labeledEndpoints.Contains(key);
         }
 
         private VerificationRecord VerifyAgainst(string pactFile,
