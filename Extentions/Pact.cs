@@ -62,7 +62,7 @@ namespace Pact.Provider.Wrapper.Models
             };
             p.Interactions = new List<Interaction>();
 
-            p._links = pact._links.Clone();
+            p._links = pact._links?.Clone();
             
             return p;
         }
