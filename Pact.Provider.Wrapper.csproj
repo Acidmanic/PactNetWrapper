@@ -9,6 +9,9 @@
     <Description>Perform Pact tests centeralized and per interaction. Publish results per endpoint and to any server or documentation tool. </Description>
     <Summary>Add package, Create test bench, start application, call Verify method.</Summary>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <RepositoryUrl>https://github.com/Acidmanic/PactNetWrapper</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/Acidmanic/PactNetWrapper</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
