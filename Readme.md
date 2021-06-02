@@ -171,6 +171,26 @@ You can also use multiple Publishers together by calling the Add method in a flu
 
 That's about it. I hope it helps saving your time.
 
+Run Tests Separately
+==================
+
+In version >= 1.1.0, you can add following attributes to your test method to control 
+what 'Endpoints' are going to be considered for Contract testing:
+
+* ```[SkipAll]```: Will not test any endpoints. All other steps will be done but no endpoints
+would be tested. Its useful to check if everything is working before running tests.
+* ```[Endpoint("path/to/service)]``` This attribute will add an endpoint to be tested.
+* ```[SkipEndpoint("path/to/service"")]```: This attribute will remove given endpoint from being tested.
+
+
+* __NOTE__: If ```SkipAll``` is present, none of tests will run. regardless of presence of 
+other attributes.
+
+* __NOTE__: If none of ```SkipAll``` and ```Endpoint``` are present, All available endpoints
+ will be tested.  This way you can exclude undesired tests by adding ```SkipEndpoint``` attributes.
+ 
+ * __NOTE__: If a number of ```Endpoint``` attributes are present, the ```SkipAll``` attributes 
+ will undo added endpoints using ```Endpoint```. 
 
 
 Regards. 
