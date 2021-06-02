@@ -32,37 +32,15 @@ namespace Pact.Provider.Wrapper.Verification
 
         public void Verify(string pactsDirectory)
         {
-            var files = Directory.EnumerateFiles(pactsDirectory);
+            var pactsToVerifyAgainst = new Json().LoadDirectory(pactsDirectory);
 
-            var pactsToVerifyAgainst = new List<Models.Pact>();
+            var verificationRecords = new List<VerificationRecord>();
 
-            foreach (var file in files)
-            {
-                try
-                {
-                    if (file.ToLower().EndsWith(".json"))
-                    {
-                        var pact = new Json().Load(file);
+            pactsToVerifyAgainst.ForEach(p => VerifyAgainst(p, verificationRecords));
 
-                        if (new PactModelValidator().Validate(pact))
-                        {
-                            pactsToVerifyAgainst.Add(pact);
-                        }
-                    }
-                }
-                catch (Exception)
-                {
-                    // ignored
-                }
+            this._publisher.Publish(verificationRecords);
 
-                var verificationRecords = new List<VerificationRecord>();
-
-                pactsToVerifyAgainst.ForEach(p => VerifyAgainst(p, verificationRecords));
-
-                this._publisher.Publish(verificationRecords);
-
-                ThrowExceptionOnFailure(verificationRecords);
-            }
+            ThrowExceptionOnFailure(verificationRecords);
         }
 
         private void ThrowExceptionOnFailure(List<VerificationRecord> verificationRecords)
@@ -146,7 +124,7 @@ namespace Pact.Provider.Wrapper.Verification
                 .Select(ep => ep.RequestPath.NormalizeHttpUri().ToLower()).ToList();
 
             var removingKeys = new List<string>();
-            
+
             foreach (var keyValuePair in selected)
             {
                 var key = keyValuePair.Key.NormalizeHttpUri().ToLower();
@@ -156,7 +134,7 @@ namespace Pact.Provider.Wrapper.Verification
                     removingKeys.Add(keyValuePair.Key);
                 }
             }
-            
+
             foreach (var removingKey in removingKeys)
             {
                 selected.Remove(removingKey);

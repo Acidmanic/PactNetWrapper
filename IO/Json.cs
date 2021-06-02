@@ -1,7 +1,11 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Pact.Provider.Wrapper.JsonConverters;
+using Pact.Provider.Wrapper.Validation;
+using Pact.Provider.Wrapper.Verification;
 
 namespace Pact.Provider.Wrapper.IO
 {
@@ -60,6 +64,36 @@ namespace Pact.Provider.Wrapper.IO
             settings.Converters.Add(new HttpMethodConverter());
 
             return settings;
+        }
+
+
+        public List<Models.Pact> LoadDirectory(string path)
+        {
+            var files = Directory.EnumerateFiles(path);
+            
+            var pacts = new List<Models.Pact>();
+            
+            foreach (var file in files)
+            {
+                try
+                {
+                    if (file.ToLower().EndsWith(".json"))
+                    {
+                        var pact = new Json().Load(file);
+
+                        if (new PactModelValidator().Validate(pact))
+                        {
+                            pacts.Add(pact);
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    // ignored
+                }
+            }
+
+            return pacts;
         }
     }
 }
