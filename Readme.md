@@ -180,7 +180,7 @@ what 'Endpoints' are going to be considered for Contract testing:
 * ```[SkipAll]```: Will not test any endpoints. All other steps will be done but no endpoints
 would be tested. Its useful to check if everything is working before running tests.
 * ```[Endpoint("path/to/service)]``` This attribute will add an endpoint to be tested.
-* ```[SkipEndpoint("path/to/service"")]```: This attribute will remove given endpoint from being tested.
+* ```[SkipEndpoint("path/to/service")]```: This attribute will remove given endpoint from being tested.
 
 
 * __NOTE__: If ```SkipAll``` is present, none of tests will run. regardless of presence of 
