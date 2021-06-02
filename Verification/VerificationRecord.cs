@@ -11,5 +11,7 @@ namespace Pact.Provider.Wrapper.Verification
         public bool Success { get; set; }
         
         public InteractionInfo Interaction { get; set; }
+        
+        public string Logs { get; set; }
     }
 }

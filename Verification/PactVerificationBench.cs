@@ -1,18 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using Pact.Provider.Wrapper.IO;
 using Pact.Provider.Wrapper.Models;
 using Pact.Provider.Wrapper.PactnetVerificationPublish;
 using Pact.Provider.Wrapper.Reflection;
-using Pact.Provider.Wrapper.Unit;
-using Pact.Provider.Wrapper.Validation;
 using Pact.Provider.Wrapper.Verification.Publishers;
-using PactNet;
-using PactNet.Infrastructure.Outputters;
 
 namespace Pact.Provider.Wrapper.Verification
 {
@@ -63,124 +55,31 @@ namespace Pact.Provider.Wrapper.Verification
         {
             var splitPacts = pact.SplitByEndpoint();
 
-            var selectedToTestEndpoints = PickSelectedEndpoints(splitPacts);
+            var selectedToTestEndpoints = new EndpointFilter().Filter(splitPacts);
 
             foreach (var ep in selectedToTestEndpoints)
             {
-                var interactions = ep.Value.Interactions;
+                var singleInteractions = ep.Value.SplitByInteractions();
 
-                if (interactions != null && interactions.Count > 0)
+                foreach (var singleInteraction in singleInteractions)
                 {
-                    var runningInteraction = pact.Interactions[0];
-
-                    string fileName = Guid.NewGuid().ToString() + ".json";
+                    var interaction = singleInteraction.Interactions[0];
 
                     var publishResultViaBroker =
-                        PactnetVerificationPublish.InterceptPactBeforeVerification(ep.Value, runningInteraction);
+                        PactnetVerificationPublish.InterceptPactBeforeVerification(singleInteraction, interaction);
 
-                    new Json().Save(fileName, ep.Value);
+                    var verificationRecord = new VerificationRecord().UpdateFrom(singleInteraction, interaction);
 
-                    var verificationRecord = VerifyAgainst(fileName, publishResultViaBroker,
-                        ep.Value, runningInteraction);
+                    using (var pactnet = new PactNetEnvironment(_serviceUri))
+                    {
+                        var result = pactnet.IsolateVerify(singleInteraction, publishResultViaBroker);
+
+                        verificationRecord.UpdateFrom(result);
+                    }
 
                     verificationRecords.Add(verificationRecord);
-
-                    try
-                    {
-                        File.Delete(fileName);
-                    }
-                    catch (Exception)
-                    {
-                        // ignored
-                    }
                 }
             }
-        }
-
-        private Dictionary<string, Models.Pact> PickSelectedEndpoints(Dictionary<string, Models.Pact> byEndpoints)
-        {
-            var skipAll = new AttributeHelper().DeliveredAttributes<SkipAllEndpointsAttribute>();
-
-            if (skipAll.Count > 0)
-            {
-                return new Dictionary<string, Models.Pact>();
-            }
-
-            var addEndpoints =
-                new AttributeHelper().DeliveredAttributes<EndpointAttribute>()
-                    .Select(ep => ep.RequestPath.NormalizeHttpUri().ToLower()).ToList();
-
-            var selected = new Dictionary<string, Models.Pact>();
-
-            foreach (var keyValuePair in byEndpoints)
-            {
-                if (addEndpoints.Count == 0 || IsLabeled(keyValuePair.Key, addEndpoints))
-                {
-                    selected.Add(keyValuePair.Key, keyValuePair.Value);
-                }
-            }
-
-            var skipEndpoints = new AttributeHelper().DeliveredAttributes<SkipEndpointAttribute>()
-                .Select(ep => ep.RequestPath.NormalizeHttpUri().ToLower()).ToList();
-
-            var removingKeys = new List<string>();
-
-            foreach (var keyValuePair in selected)
-            {
-                var key = keyValuePair.Key.NormalizeHttpUri().ToLower();
-
-                if (skipEndpoints.Contains(key))
-                {
-                    removingKeys.Add(keyValuePair.Key);
-                }
-            }
-
-            foreach (var removingKey in removingKeys)
-            {
-                selected.Remove(removingKey);
-            }
-
-            return selected;
-        }
-
-        private bool IsLabeled(string endpoint, List<string> labeledEndpoints)
-        {
-            var key = endpoint.NormalizeHttpUri().ToLower();
-
-            return labeledEndpoints.Count == 0 || labeledEndpoints.Contains(key);
-        }
-
-        private VerificationRecord VerifyAgainst(string pactFile,
-            bool publishResultViaBroker, Models.Pact runningPact, Interaction runningInteraction)
-        {
-            var verifierConfig = new PactVerifierConfig
-            {
-                Outputters = new IOutput[] {new ConsoleOutput()},
-                PublishVerificationResults = publishResultViaBroker,
-                ProviderVersion = "1"
-            };
-            var verifier = new PactVerifier(verifierConfig);
-
-            verifier.ServiceProvider(runningPact.Provider?.Name, _serviceUri);
-
-            verifier.PactUri(pactFile);
-
-            VerificationRecord record = new VerificationRecord().UpdateFrom(runningPact, runningInteraction);
-
-            try
-            {
-                verifier.Verify();
-
-                record.Success = true;
-            }
-            catch (Exception e)
-            {
-                record.Success = false;
-
-                record.Exception = e;
-            }
-
-            return record;
         }
 
         public BatchVerificationPublisher WithPublishers()
