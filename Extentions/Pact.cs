@@ -31,6 +31,7 @@ namespace Pact.Provider.Wrapper.Models
                 if (!caseSensitive)
                 {
                     key = key.ToLower();
+                    
                 }
                 if (!pactsByEndpoint.ContainsKey(key))
                 {

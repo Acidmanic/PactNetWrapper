@@ -83,7 +83,12 @@ namespace Pact.Provider.Wrapper.Verification.Publishers.HtmlReportVerificationPu
                             .Append("margin", "auto")
                             .Append("margin-top", "120px")
 
-                    )
+                    ).Append(
+                        ".details-paragraph",new Style()
+                            .Append("font-size","0.8em")
+                            .Append("font-weight","normal")
+                            .Append("text-align","left")
+                        )
             );
         }
 
@@ -114,8 +119,8 @@ namespace Pact.Provider.Wrapper.Verification.Publishers.HtmlReportVerificationPu
             ).Attribute("class", "table-cell table-cell-" + status.ToLower()) as TableCell);
             
             tableRow.Cells.Add(new TableCell(
-                new Bold(new Text(HttpUtility.HtmlEncode(record.Logs)))
-            ).Attribute("class", "table-cell table-cell-" + status.ToLower()) as TableCell);
+                new Text(HttpUtility.HtmlEncode(record.Logs))
+            ).Attribute("class", "table-cell details-paragraph" ) as TableCell);
 
             return tableRow;
         }
