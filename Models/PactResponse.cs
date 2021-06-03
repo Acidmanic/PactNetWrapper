@@ -10,5 +10,7 @@ namespace Pact.Provider.Wrapper.Models
         public Dictionary<string, string> Headers { get; set; }
         
         public Hashtable Body { get; set; }
+        
+        public Dictionary<string,MatchingRule> MatchingRules { get; set; }
     }
 }
