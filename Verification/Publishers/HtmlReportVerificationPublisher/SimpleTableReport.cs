@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Web;
 using Pact.Provider.Wrapper.Verification.Publishers.HtmlReportVerificationPublisher.Html;
 
 
@@ -111,6 +112,10 @@ namespace Pact.Provider.Wrapper.Verification.Publishers.HtmlReportVerificationPu
             tableRow.Cells.Add(new TableCell(
                 new Bold(new Text(status))
             ).Attribute("class", "table-cell table-cell-" + status.ToLower()) as TableCell);
+            
+            tableRow.Cells.Add(new TableCell(
+                new Bold(new Text(HttpUtility.HtmlEncode(record.Logs)))
+            ).Attribute("class", "table-cell table-cell-" + status.ToLower()) as TableCell);
 
             return tableRow;
         }
@@ -137,6 +142,9 @@ namespace Pact.Provider.Wrapper.Verification.Publishers.HtmlReportVerificationPu
                 new Bold(new Text("Status"))
             ).Attribute("class", "table-header") as TableCell);
 
+            tableRow.Cells.Add(new TableCell(
+                new Bold(new Text("Details"))
+            ).Attribute("class", "table-header") as TableCell);
             return tableRow;
         }
        
