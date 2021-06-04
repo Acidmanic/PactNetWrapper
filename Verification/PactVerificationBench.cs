@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Pact.Provider.Wrapper.IO;
 using Pact.Provider.Wrapper.Models;
 using Pact.Provider.Wrapper.PactnetVerificationPublish;
+using Pact.Provider.Wrapper.PactPort;
 using Pact.Provider.Wrapper.Reflection;
 using Pact.Provider.Wrapper.Verification.Publishers;
 
@@ -12,15 +13,29 @@ namespace Pact.Provider.Wrapper.Verification
     {
         private readonly string _serviceUri;
         private BatchVerificationPublisher _publisher;
-
+        private Func<bool,IPactVerifier> _pactVerifierFactory;
         public IPactnetVerificationPublish PactnetVerificationPublish { get; set; }
 
         public PactVerificationBench(string serviceUri)
         {
             this._serviceUri = serviceUri;
             this.PactnetVerificationPublish = new NullPactnetVerificationPublish();
+            
         }
 
+        public PactVerificationBench UsePactNet()
+        {
+            _pactVerifierFactory = (publish) => new  PactNetEnvironment(_serviceUri,publish);
+
+            return this;
+        }
+
+        public PactVerificationBench UseInternalPactVerifier()
+        {
+            _pactVerifierFactory = _ => new  DefaultPactVerifier(_serviceUri);
+
+            return this;
+        }
 
         public void Verify(string pactsDirectory)
         {
@@ -70,13 +85,13 @@ namespace Pact.Provider.Wrapper.Verification
 
                     var verificationRecord = new VerificationRecord().UpdateFrom(singleInteraction, interaction);
 
-                    using (var pactnet = new PactNetEnvironment(_serviceUri))
+                    using (var pactnet = _pactVerifierFactory(publishResultViaBroker))
                     {
-                        var result = pactnet.IsolateVerify(singleInteraction, publishResultViaBroker);
-
-                        verificationRecord.UpdateFrom(result);
+                        var result = pactnet.Verify(singleInteraction);
+                    
+                        verificationRecord.UpdateFrom(result[0]);
                     }
-
+                    
                     verificationRecords.Add(verificationRecord);
                 }
             }
