@@ -193,6 +193,35 @@ other attributes.
  will undo added endpoints using ```Endpoint```. 
 
 
+Matchers
+================
+
+I Got into some problems using PactNet with matchers at provider side's tests. Since i could not
+ find a way to get matchers work yet, i implemented an internal PactVerifier which does support 
+ matchers for request body (for now). So using this is also another option. You can use it by calling
+  ```bench..UseInternalPactVerifier()```. This will use builtin pact verifier instead of wrapped rubby code.
+
+```c#
+    // Unit test method based on exceptions like xUnit (with [Fact] attribute or NUnit or etc...
+    public void Providers_GivenPacts_ShouldHonorAllPacts(){
+        // settup your application
+        var app = SetupApp();
+        // Start api service(s)
+        app.Start();
+        // Create test bench
+        // This example assumes your services would be up at http://localhost:9222 
+        var bench = new PactVerificationBench("http://localhost:9222");
+        // Make it use builtin verifier
+        bench.UseInternalPactVerifier();
+        // Assuming the test projects executable is built at 
+        // <project-directory>/bin/<configuration>/<sdk>/<executable>
+        // for example: Example.Pact.Test/bin/Debug/netcoreapp3.1/Example.Pact.Test
+        bench.Verify("../../../../Pacts");
+        // Stop api service(s)
+        app.StopAsync().Wait();
+    }
+ ```
+
 Regards. 
 
 Mani.
