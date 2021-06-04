@@ -20,7 +20,7 @@ namespace Pact.Provider.Wrapper.Verification
         {
             this._serviceUri = serviceUri;
             this.PactnetVerificationPublish = new NullPactnetVerificationPublish();
-            
+            UsePactNet();
         }
 
         public PactVerificationBench UsePactNet()
