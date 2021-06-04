@@ -119,12 +119,28 @@ namespace Pact.Provider.Wrapper.Verification.Publishers.HtmlReportVerificationPu
             ).Attribute("class", "table-cell table-cell-" + status.ToLower()) as TableCell);
             
             tableRow.Cells.Add(new TableCell(
-                new Text(HttpUtility.HtmlEncode(record.Logs))
+                new Text(ParagraphEncode(record.Logs))
             ).Attribute("class", "table-cell details-paragraph" ) as TableCell);
 
             return tableRow;
         }
 
+        private string ParagraphEncode(string text)
+        {
+            text = text.Replace("\r", "\n");
+
+            while (text.Contains("\n\n"))
+            {
+                text = text.Replace("\n\n", "\n");
+            }
+
+            text = HttpUtility.HtmlEncode(text);
+            
+            text = text.Replace("\n", "<br>");
+
+            return text;
+        }
+        
         private TableRow TableHeader()
         {
             var tableRow = new TableRow();
