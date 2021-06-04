@@ -1,29 +1,34 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Pact.Provider.Wrapper.IO;
 using PactNet;
 using PactNet.Infrastructure.Outputters;
+using PactNet.Mocks.MockHttpService.Models;
+using IPactVerifier = Pact.Provider.Wrapper.PactPort.IPactVerifier;
 
 namespace Pact.Provider.Wrapper.Verification
 {
-    public class PactNetEnvironment : IDisposable
+    public class PactNetEnvironment : IDisposable, IPactVerifier
     {
         private string _jsonFileName;
         private string _serviceUri;
+        private bool _publish;
 
-        public PactNetEnvironment(string serviceUri)
+        public PactNetEnvironment(string serviceUri, bool publish)
         {
             this._serviceUri = serviceUri;
             _jsonFileName = Guid.NewGuid().ToString() + ".json";
+            _publish = publish;
         }
 
-        public PactnetVerificationResult IsolateVerify(Models.Pact pact, bool publish)
+        public List<PactnetVerificationResult> Verify(Models.Pact pact)
         {
             SilentKill();
 
             new Json().Save(_jsonFileName, pact);
 
-            return VerifyUsingPactNet(_jsonFileName, publish, pact);
+            return new List<PactnetVerificationResult>() {VerifyUsingPactNet(_jsonFileName, _publish, pact)};
         }
 
         private PactnetVerificationResult VerifyUsingPactNet(string pactFile,
@@ -39,6 +44,7 @@ namespace Pact.Provider.Wrapper.Verification
                 PublishVerificationResults = publishResultViaBroker,
                 ProviderVersion = "1"
             };
+
             var verifier = new PactVerifier(verifierConfig);
 
             verifier.ServiceProvider(runningPact.Provider?.Name, _serviceUri);
