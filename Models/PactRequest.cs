@@ -12,6 +12,8 @@ namespace Pact.Provider.Wrapper.Models
 
         public Dictionary<string, string> Headers { get; set; }
         
+        public string Query { get; set; }
+        
         public Hashtable Body { get; set; }
     }
 }
