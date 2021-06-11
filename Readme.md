@@ -222,6 +222,14 @@ I Got into some problems using PactNet with matchers at provider side's tests. S
     }
  ```
 
+Updates
+======
+
+You can trace changes and updates log in [Change log Document](ChangeLog.md).
+
+
+
+
 Regards. 
 
 Mani.
