@@ -162,6 +162,10 @@ More Details
 
 For More detailed version of this readme file, please refer to [Github Page](https://github.com/Acidmanic/PactNetWrapper) for this project.
 
+Updates
+======
+
+You can trace changes and updates log in [Change log Document](https://github.com/Acidmanic/PactNetWrapper/blob/master/ChangeLog.md).
 
 
 Regards. 
