@@ -113,48 +113,6 @@ namespace Pact.Provider.Wrapper.PactPort
             return matcher.IsMatch(expectationsMatchingRules, expectedHeaders, actualHeaders,log);
         }
         
-        private bool VerifyHeaders(Dictionary<string, string> expectations, HttpResponseHeaders actuals,
-            PactLogBuilder log)
-        {
-            var success = true;
-
-            foreach (var headersKey in expectations.Keys)
-            {
-                var header = SearchForKey(headersKey, actuals);
-
-                if (header.Key == null)
-                {
-                    log.NotFound(headersKey);
-
-                    success = false;
-                }
-                else
-                {
-                    var expectedHeader = expectations[headersKey];
-
-                    var actualHeader = header.Value;
-
-                    var enumerable = actualHeader as string[] ?? actualHeader.ToArray();
-
-                    if (!enumerable.Contains(expectedHeader))
-                    {
-                        var values = "";
-
-                        foreach (var s in enumerable)
-                        {
-                            values += s + "; ";
-                        }
-
-                        //LogAssert($"{headersKey}:{expectedHeader}", $"{header.Value}:{values}", log);
-
-                        success = false;
-                    }
-                }
-            }
-
-            return success;
-        }
-
         private KeyValuePair<string, IEnumerable<string>> SearchForKey(string findingKey,
             HttpResponseHeaders actualHeaders)
         {
