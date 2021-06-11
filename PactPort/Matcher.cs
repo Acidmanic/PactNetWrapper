@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
 using Pact.Provider.Wrapper.Models;
 
@@ -9,11 +8,66 @@ namespace Pact.Provider.Wrapper.PactPort
     public class Matcher
     {
 
+        public bool IsMatch(Dictionary<string, MatchingRule> ruleset,
+            Dictionary<string,List<string>> expected,
+            Dictionary<string,List<string>> actual,
+            PactLogBuilder log)
+        {
+            bool match = true;
+            
+            var ruleFinder = new RuleFinder();
+            
+            foreach (var keyValuePair in expected)
+            {
+                var corresponding = Find(actual, keyValuePair.Key);
+                
+                if (corresponding.Key == null)
+                {
+                    log.NotFound(corresponding.Key);
+
+                    match = false;
+                }
+                else
+                {
+                    var path = $"$.headers.{keyValuePair.Key}";
+
+                    var expectedMatchingRule = ruleFinder.FindRule(path, ruleset);
+
+                    foreach (var expectedValue in keyValuePair.Value)
+                    {
+                        if (!ContainsMatch(expectedMatchingRule, expectedValue, corresponding.Value))
+                        {
+                            match = false;
+
+                            log.NotFound(path);
+                        }
+                    }   
+                }
+            }
+            return match;
+        }
+
+        public bool ContainsMatch<TExpected, TActual>(MatchingRule rule, TExpected expected, IEnumerable<TActual> actuals)
+        {
+            foreach (var actual in actuals)
+            {
+                if (IsMatch(rule, expected, actual))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private KeyValuePair<string, List<string>> Find(Dictionary<string,List<string>> actual, string key)
+        {
+            throw new NotImplementedException();
+        }
 
         public bool IsMatch(Dictionary<string, MatchingRule> ruleset, 
             Dictionary<string, object> expected,
             Dictionary<string, object> actual,
-            StringBuilder log)
+            PactLogBuilder log)
         {
             var finder = new RuleFinder();
             var match = true;
@@ -24,7 +78,7 @@ namespace Pact.Provider.Wrapper.PactPort
                 {
                     match = false;
 
-                    log.Append($"Unable to find key: {expectedKey}.\n");
+                    log.NotFound(expectedKey);
                 }
                 else
                 {
@@ -36,11 +90,8 @@ namespace Pact.Provider.Wrapper.PactPort
                     {
                         match = false;
 
-                        var expectedMessage = (rule.Match == "regex") ? rule.Regex : expectedValue;
+                        log.Unmatched(expectedValue, actualValue, rule);
                         
-                        log.Append($"Expected to find value matching {rule.Match} " +
-                                   $"with {expectedMessage}, " +
-                                   $"but found {actualValue}\n");
                     }
                 }
             }
@@ -79,28 +130,21 @@ namespace Pact.Provider.Wrapper.PactPort
 
         private bool TypeMatch(object expected, object actual)
         {
-            if ((expected is string && actual is string)
-                || (IsInteger(expected) && IsInteger(actual))
-                || (IsFloatingPoint(expected) && IsFloatingPoint(actual))
-                || (expected is bool && actual is bool)
-                || (expected is char && actual is char))
+            var expectedType = expected.GetEcmaType();
+            
+            var actualType  = actual.GetEcmaType();
+
+            if (!expectedType.Equals(actualType))
             {
-                return true;
+                return false;
             }
-            return expected.GetType() == actual.GetType();
+            if (EcmaTypes.EcmaTypes.Object.Equals(expectedType))
+            {
+                return actualType.ProtoType.Covers(expectedType.ProtoType);
+            }
+            return true;
         }
 
-        private bool IsFloatingPoint(object value)
-        {
-            return value is float || value is double ||
-                   value is decimal;
-        }
-
-        private bool IsInteger(object value)
-        {
-            return value is int || value is long || value is short
-                   || value is byte || value is uint || value is ulong
-                   || value is ushort;
-        }
+        
     }
 }
