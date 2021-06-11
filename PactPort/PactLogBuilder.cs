@@ -72,5 +72,10 @@ namespace Pact.Provider.Wrapper.PactPort
 
             return this;
         }
+
+        public override string ToString()
+        {
+            return _content.ToString();
+        }
     }
 }
