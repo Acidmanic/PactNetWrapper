@@ -36,11 +36,11 @@ namespace Pact.Provider.Wrapper.PactPort
         {
             PactnetVerificationResult result = new PactnetVerificationResult();
 
-            var logs = new StringBuilder();
+            var logs = new PactLogBuilder();
 
             try
             {
-                HttpRequestMessage request = DesignFrom(interaction);
+                HttpRequestMessage request = DesignRequestForInteraction(interaction);
 
                 HttpClient client = new HttpClient {BaseAddress = new Uri(_serviceUri)};
 
@@ -62,12 +62,8 @@ namespace Pact.Provider.Wrapper.PactPort
             return result;
         }
 
-        private StringBuilder LogAssert<T1, T2>(T1 expected, T2 actual, StringBuilder log)
-        {
-            return log.Append($"Expected status code: {expected}, But Received {actual}.\n");
-        }
 
-        private bool Compare(PactResponse expectations, HttpResponseMessage actual, StringBuilder log)
+        private bool Compare(PactResponse expectations, HttpResponseMessage actual, PactLogBuilder log)
         {
             var success = true;
 
@@ -75,12 +71,13 @@ namespace Pact.Provider.Wrapper.PactPort
             {
                 if ((int) actual.StatusCode != expectations.Status)
                 {
-                    LogAssert(expectations.Status, actual.StatusCode, log);
+                    log.Unmatched(expectations.Status, actual.StatusCode);
+                    
                     success = false;
                 }
             }
 
-            success &= VerifyHeaders(expectations.Headers, actual.Headers, log);
+            success &= VerifyHeaders(expectations.MatchingRules,expectations.Headers, actual.Headers, log);
 
             success &= VerifyBodies(expectations.MatchingRules, expectations.Body, actual.Content, log);
 
@@ -88,47 +85,36 @@ namespace Pact.Provider.Wrapper.PactPort
         }
 
         private bool VerifyBodies(Dictionary<string, MatchingRule> expectationsMatchingRules,
-            Hashtable expectationsBody, HttpContent actualContent, StringBuilder log)
+            Hashtable expectationsBody, HttpContent actualContent, PactLogBuilder log)
         {
             var actualJson = actualContent.ReadAsStringAsync().Result;
 
             var actualHashTable = JsonConvert.DeserializeObject<Hashtable>(actualJson);
 
-            var expectedDic = Flatten(expectationsBody, "$.body");
+            var expectedDic = new DataConvert().Flatten(expectationsBody, "$.body");
 
-            var actualDic = Flatten(actualHashTable, "$.body");
+            var actualDic = new DataConvert().Flatten(actualHashTable, "$.body");
 
             var matcher = new Matcher();
 
             return matcher.IsMatch(expectationsMatchingRules, expectedDic, actualDic, log);
         }
 
-        private Dictionary<string, object> Flatten(Hashtable data, string prefix)
+
+        private bool VerifyHeaders(Dictionary<string, MatchingRule> expectationsMatchingRules,
+            Dictionary<string, string> expectations, HttpResponseHeaders actuals,
+            PactLogBuilder log)
         {
-            var result = new Dictionary<string, object>();
+            var expectedHeaders = new DataConvert().Normalize(expectations);
+            var actualHeaders = new DataConvert().Normalize(actuals);
+            
+            var matcher = new Matcher();
 
-            Flatten(prefix, data, result);
-
-            return result;
+            return matcher.IsMatch(expectationsMatchingRules, expectedHeaders, actualHeaders,log);
         }
-
-        private void Flatten(string prefix, Hashtable data, Dictionary<string, object> result)
-        {
-            foreach (DictionaryEntry entry in data)
-            {
-                if (entry.Value is Hashtable)
-                {
-                    Flatten(prefix + "." + entry.Key, entry.Value as Hashtable, result);
-                }
-                else
-                {
-                    result.Add(prefix + "." + (string) entry.Key, entry.Value);
-                }
-            }
-        }
-
+        
         private bool VerifyHeaders(Dictionary<string, string> expectations, HttpResponseHeaders actuals,
-            StringBuilder log)
+            PactLogBuilder log)
         {
             var success = true;
 
@@ -138,7 +124,7 @@ namespace Pact.Provider.Wrapper.PactPort
 
                 if (header.Key == null)
                 {
-                    LogAssert(headersKey, "Nothing", log);
+                    log.NotFound(headersKey);
 
                     success = false;
                 }
@@ -159,7 +145,7 @@ namespace Pact.Provider.Wrapper.PactPort
                             values += s + "; ";
                         }
 
-                        LogAssert($"{headersKey}:{expectedHeader}", $"{header.Value}:{values}", log);
+                        //LogAssert($"{headersKey}:{expectedHeader}", $"{header.Value}:{values}", log);
 
                         success = false;
                     }
@@ -185,7 +171,7 @@ namespace Pact.Provider.Wrapper.PactPort
             return new KeyValuePair<string, IEnumerable<string>>(null, null);
         }
 
-        private HttpRequestMessage DesignFrom(Interaction interaction)
+        private HttpRequestMessage DesignRequestForInteraction(Interaction interaction)
         {
             var req = interaction.Request;
 
