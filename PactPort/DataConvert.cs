@@ -8,8 +8,6 @@ namespace Pact.Provider.Wrapper.PactPort
 {
     public class DataConvert
     {
-        
-        
         public Dictionary<string, object> Flatten(Hashtable data, string prefix)
         {
             var result = new Dictionary<string, object>();
@@ -21,15 +19,18 @@ namespace Pact.Provider.Wrapper.PactPort
 
         private void Flatten(string prefix, Hashtable data, Dictionary<string, object> result)
         {
-            foreach (DictionaryEntry entry in data)
+            if (data != null)
             {
-                if (entry.Value is Hashtable)
+                foreach (DictionaryEntry entry in data)
                 {
-                    Flatten(prefix + "." + entry.Key, entry.Value as Hashtable, result);
-                }
-                else
-                {
-                    result.Add(prefix + "." + (string) entry.Key, entry.Value);
+                    if (entry.Value is Hashtable)
+                    {
+                        Flatten(prefix + "." + entry.Key, entry.Value as Hashtable, result);
+                    }
+                    else
+                    {
+                        result.Add(prefix + "." + (string) entry.Key, entry.Value);
+                    }
                 }
             }
         }
@@ -37,12 +38,12 @@ namespace Pact.Provider.Wrapper.PactPort
         public Dictionary<string, List<string>> Normalize(HttpResponseHeaders src)
         {
             var normalized = new Dictionary<string, List<string>>();
-            
+
             var listedValues = src.ToList();
 
             foreach (var keyValuePair in listedValues)
             {
-                normalized.Add(keyValuePair.Key,keyValuePair.Value.ToList());
+                normalized.Add(keyValuePair.Key, keyValuePair.Value.ToList());
             }
 
             return normalized;
@@ -51,19 +52,21 @@ namespace Pact.Provider.Wrapper.PactPort
         public Dictionary<string, List<string>> Normalize(IEnumerable<KeyValuePair<string, string>> src)
         {
             var normalized = new Dictionary<string, List<string>>();
-                
+
             foreach (var keyValuePair in src)
             {
-                string[] values = keyValuePair.Value?.Split(new char[]{';'}, StringSplitOptions.RemoveEmptyEntries);
+                string[] values = keyValuePair.Value?.Split(new char[] {';'}, StringSplitOptions.RemoveEmptyEntries);
 
                 values = values ?? new string[] { };
 
                 if (!normalized.ContainsKey(keyValuePair.Key))
                 {
-                    normalized.Add(keyValuePair.Key,new List<string>());
+                    normalized.Add(keyValuePair.Key, new List<string>());
                 }
+
                 normalized[keyValuePair.Key].AddRange(values);
             }
+
             return normalized;
         }
 
@@ -84,7 +87,7 @@ namespace Pact.Provider.Wrapper.PactPort
 
                 if (type.IsPrimitive)
                 {
-                    result.Add(prefix,data);
+                    result.Add(prefix, data);
                 }
                 else
                 {
@@ -97,7 +100,7 @@ namespace Pact.Provider.Wrapper.PactPort
                             try
                             {
                                 var value = property.GetValue(data);
-                            
+
                                 Flatten(value, property.Name, result);
                             }
                             catch
@@ -109,6 +112,5 @@ namespace Pact.Provider.Wrapper.PactPort
                 }
             }
         }
-        
     }
 }
