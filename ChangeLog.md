@@ -21,4 +21,7 @@
 * Internal PactVerifier Supports Matchers for Response.Headers
 * Internal PactVerifier's type matching improved.
 
-    
+1.3.1
+-----
+
+   * Issue "NullReference Exception for null/empty body response" has been fixed.
