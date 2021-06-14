@@ -77,9 +77,11 @@ namespace Pact.Provider.Wrapper.PactPort
                 }
             }
 
-            success &= VerifyHeaders(expectations.MatchingRules,expectations.Headers, actual.Headers, log);
+            var ruleSet = expectations.MatchingRules ?? new Dictionary<string, MatchingRule>();
 
-            success &= VerifyBodies(expectations.MatchingRules, expectations.Body, actual.Content, log);
+            success &= VerifyHeaders(ruleSet,expectations.Headers, actual.Headers, log);
+
+            success &= VerifyBodies(ruleSet, expectations.Body, actual.Content, log);
 
             return success;
         }

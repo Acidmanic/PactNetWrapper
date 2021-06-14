@@ -10,13 +10,17 @@ namespace Pact.Provider.Wrapper.PactPort
 
         public MatchingRule FindRule(string path,Dictionary<string,MatchingRule> ruleSet)
         {
-            while (!string.IsNullOrEmpty(path))
+            if (ruleSet != null)
             {
-                if (ruleSet.ContainsKey(path))
+                while (!string.IsNullOrEmpty(path))
                 {
-                    return ruleSet[path];
+                    if (ruleSet.ContainsKey(path))
+                    {
+                        return ruleSet[path];
+                    }
+
+                    path = Parent(path);
                 }
-                path = Parent(path);
             }
             return new MatchingRule(){Match = "exact"};
         }
