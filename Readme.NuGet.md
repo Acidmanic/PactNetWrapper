@@ -22,12 +22,9 @@ In my case, i publish the results to a badge server and i use these badges in my
   in my case, which i run my tests on a 64 bit linux, i add   ```<PackageReference Include="PactNet.Linux.x64" Version="3.0.0" />``` reference alongside the ```<PackageReference Include="Pact.Provider.Wrapper" />``` reference in my csproj file (or via package manager and etc.). Other platforms can be __PactNet.Windows__, __PactNet.Linux.x86__ and __PactNet.OSX__ |
    
    
-Examples
+Simple Example
 ================
  
- Without publishing the results
- ------------
- 
  ```c#
     // Unit test method based on exceptions like xUnit (with [Fact] attribute or NUnit or etc...
     public void Providers_GivenPacts_ShouldHonorAllPacts(){
@@ -46,111 +43,18 @@ Examples
         app.StopAsync().Wait();
     }
  ```
-
-
-With Original Pact broker
------------------
-
- ```c#
-    // Unit test method based on exceptions like xUnit (with [Fact] attribute or NUnit or etc...
-    public void Providers_GivenPacts_ShouldHonorAllPacts(){
-        // settup your application
-        var app = SetupApp();
-        // Start api service(s)
-        app.Start();
-        // Create test bench
-        // This example assumes your services would be up at http://localhost:9222 
-        var bench = new PactVerificationBench("http://localhost:9222");
-        // >>>>>>>>>>>>>>>>>>>>>>
-        // Use DefaultPactnetVerificationPublish which makes test bench use the
-        // Original Pact broker for publishing results besed on _links data. 
-        bench.PactnetVerificationPublish = new DefaultPactnetBrokerPublish();
-        // Assuming the test projects executable is built at 
-        // <project-directory>/bin/<configuration>/<sdk>/<executable>
-        // for example: Example.Pact.Test/bin/Debug/netcoreapp3.1/Example.Pact.Test
-        bench.Verify("../../../../Pacts");
-        // Stop api service(s)
-        app.StopAsync().Wait();
-    }
- ```
-
-
-Use Html Publisher
-------------------
-
- ```c#
-    // Unit test method based on exceptions like xUnit (with [Fact] attribute or NUnit or etc...
-    public void Providers_GivenPacts_ShouldHonorAllPacts(){
-        // settup your application
-        var app = SetupApp();
-        // Start api service(s)
-        app.Start();
-        // Create test bench
-        // This example assumes your services would be up at http://localhost:9222 
-        var bench = new PactVerificationBench("http://localhost:9222");
-        // >>>>>>>>>>>>>>>>>>>>>>
-        // With this line, an html file named Report.html will be generated where 
-        // your executable file is placed. The filename argument can point to any 
-        // other address you prefer. 
-        bench.WithPublishers()
-                        .Add(new HtmlReportVerificationPublisher("Report.html"))
-        // Assuming the test projects executable is built at 
-        // <project-directory>/bin/<configuration>/<sdk>/<executable>
-        // for example: Example.Pact.Test/bin/Debug/netcoreapp3.1/Example.Pact.Test
-        bench.Verify("../../../../Pacts");
-        // Stop api service(s)
-        app.StopAsync().Wait();
-    }
- ```
-
-Use a Custom Publisher
--------------------
-You can implement the interface ```IVerificationPublisher```, and use it for publishing verification results. 
-I have my own implementation named: __AcidmanicPactBrokerPublisher__, which takes an address and a token in 
-its constructor. Where the address points to where I host my broker. my [broker](https://github.com/Acidmanic/pactbroker-server) 
-Also needs a token to communicate, which is also passed to the constructor. 
-
-(In real case scenario, to prevent putting passwords in code, i take it from environment variables, which is useful when you are running your tests in cicd pipelines)    
-
-```c#
-    // Unit test method based on exceptions like xUnit (with [Fact] attribute or NUnit or etc...
-    public void Providers_GivenPacts_ShouldHonorAllPacts(){
-        // settup your application
-        var app = SetupApp();
-        // Start api service(s)
-        app.Start();
-        // Create test bench
-        // This example assumes your services would be up at http://localhost:9222 
-        var bench = new PactVerificationBench("http://localhost:9222");
-        // In this example the class YourCustomPactBrokerPublisher, is an implementation
-        // of the interface IVerificationPublisher
-        bench.WithPublishers().Add(new YourCustomPactBrokerPublisher());
-        // Assuming the test projects executable is built at 
-        // <project-directory>/bin/<configuration>/<sdk>/<executable>
-        // for example: Example.Pact.Test/bin/Debug/netcoreapp3.1/Example.Pact.Test
-        bench.Verify("../../../../Pacts");
-        // Stop api service(s)
-        app.StopAsync().Wait();
-    }
- ```
-
-
-You can also use multiple Publishers together by calling the Add method in a fluent syntax fashion.
-
-```c#
-    bench.WithPublishers()
-                .Add(new HtmlReportVerificationPublisher("Report.html"))
-                .Add(new YourCustomPactBrokerPublisher());
-``` 
-
-That's about it. I hope it helps saving your time.
 
 Other Feature
 ===========
  * Run Tests Separately
  * Use Matchers
  * Register Request Filters
-
+ * Publish Results 
+    * Using Pact Broker
+    * To Html file
+    * Using Custom Publisher(s)
+ * Verify Using PactNet (Rubby Wrapper) Or BuiltIn C# Pact verifier (InternalVerifier)
+ 
 More Details
 ----
 
