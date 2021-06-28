@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Pact.Provider.Wrapper.Models;
@@ -10,11 +11,14 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
         {
             string headersKey = "$.headers.";
             string bodyKey = "$.body.";
-            
-            var requestBody = interaction.Request.Body;
-            
-            var  requestBodyData = new DynamicObjectAccess(true).Flatten(requestBody,"");
+            string queryKey = "$.query.";
 
+            var requestBody = interaction.Request.Body;
+
+            var requestBodyData = new DynamicObjectAccess(true).Flatten(requestBody, "");
+
+            var requestQueryData = QueryToDictionary(interaction.Request.Query);
+            
             if (RequestPathMatch(filter.RequestPath, interaction.Request.Path))
             {
                 if (filter.DataKey.StartsWith(headersKey))
@@ -32,13 +36,73 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
                         requestBodyData[dataKey] = filter.OverrideValue;
                     }
                 }
+                else if (filter.DataKey.StartsWith(queryKey))
+                {
+                    string dataKey = TrimStart(filter.DataKey, bodyKey);
+
+                    if (requestQueryData.ContainsKey(dataKey))
+                    {
+                        requestQueryData[dataKey] = filter.OverrideValue as string;
+                    }
+                }
             }
-            
-            requestBody = new DynamicObjectAccess(true).LoadInto(requestBody,requestBodyData);
+
+            requestBody = new DynamicObjectAccess(true).LoadInto(requestBody, requestBodyData);
 
             interaction.Request.Body = requestBody;
 
+            interaction.Request.Query = DictionaryToQuery(requestQueryData);
+            
             return interaction;
+        }
+
+        private string DictionaryToQuery(Dictionary<string, string> queryData)
+        {
+            var sep = "";
+
+            string query = "";
+            
+            foreach (var keyValuePair in queryData)
+            {
+                query += sep + keyValuePair.Key;
+                
+                if (!string.IsNullOrEmpty(keyValuePair.Value))
+                {
+                    query += "=" + keyValuePair.Value;
+                }
+
+                sep = "&";
+            }
+
+            return query;
+        }
+
+        private Dictionary<string, string> QueryToDictionary(string query)
+        {
+            var queryData = new Dictionary<string, string>();
+            
+            var segments = query.Split(new[] {'&'}, StringSplitOptions.RemoveEmptyEntries);
+
+            for (var i = 0; i < segments.Length; i++)
+            {
+                var segment = segments[0];
+
+                var st = segment.IndexOf("=", StringComparison.Ordinal);
+
+                var key = segment;
+                
+                string value = null;
+
+                if (st > -1)
+                {
+                    key = segment.Substring(0, st);
+
+                    value = segment.Substring(st, segment.Length - st);
+                }
+                queryData.Add(key,value);
+            }
+
+            return queryData;
         }
 
         private Interaction ApplyHeaderFilter(Interaction interaction, string dataKey, object filterOverrideValue)
@@ -54,7 +118,7 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
             return interaction;
         }
 
-        private void RemoveAll(string key, Dictionary<string,string> requestHeaders)
+        private void RemoveAll(string key, Dictionary<string, string> requestHeaders)
         {
             var removing = new List<string>();
 
@@ -65,6 +129,7 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
                     removing.Add(headerKey);
                 }
             }
+
             foreach (var headerKey in removing)
             {
                 if (requestHeaders.ContainsKey(headerKey))
