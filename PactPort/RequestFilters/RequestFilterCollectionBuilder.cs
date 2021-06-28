@@ -5,37 +5,58 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
     public class RequestFilterCollectionBuilder
     {
         private bool _containsNotDelivered = false;
-        
+        private RequestFilter _filter;
         private readonly List<RequestFilter> _filters  = new List<RequestFilter>();
 
-        private RequestFilterBuilder _requestFilterBuilder = null;
         
-        
-        
-        public RequestFilterBuilder Add()
+        public RequestFilterCollectionBuilder Add()
         {
             CheckDelivery();
             
-            _requestFilterBuilder = new RequestFilterBuilder();
+            _filter = new RequestFilter
+            {
+                RequestPath = "",
+                DataKey = "",
+                OverrideValue = null
+            };
 
             _containsNotDelivered = true;
 
-            return _requestFilterBuilder;
+            return this;
+        }
+        
+        public RequestFilterCollectionBuilder WithRequestPathUnder(string path)
+        {
+            _filter.RequestPath = path;
+
+            return this;
+        }
+
+
+        public RequestFilterCollectionBuilder Put(object value)
+        {
+            _filter.OverrideValue = value;
+
+            return this;
+        }
+
+        public RequestFilterCollectionBuilder At(string dataPath)
+        {
+            _filter.DataKey = dataPath;
+
+            return this;
         }
 
         private void CheckDelivery()
         {
             if (_containsNotDelivered)
             {
-                var filter = _requestFilterBuilder.Build();
-                
-                _filters.Add(filter);
+                _filters.Add(_filter);
                 
                 _containsNotDelivered = false;
             }
         }
-
-
+        
         public List<RequestFilter> Build()
         {
             CheckDelivery();
