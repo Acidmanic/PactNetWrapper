@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using Pact.Provider.Wrapper.Models;
 
 namespace Pact.Provider.Wrapper.PactPort.RequestFilters
@@ -42,18 +43,35 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
 
         private Interaction ApplyHeaderFilter(Interaction interaction, string dataKey, object filterOverrideValue)
         {
-            var key = dataKey.Trim();
+            var key = dataKey.Trim().ToLower();
 
             string value = filterOverrideValue.ToString();
 
-            if (interaction.Request.Headers.ContainsKey(key))
-            {
-                interaction.Request.Headers.Remove(key);
-            }
+            RemoveAll(key, interaction.Request.Headers);
 
             interaction.Request.Headers.Add(key, value);
 
             return interaction;
+        }
+
+        private void RemoveAll(string key, Dictionary<string,string> requestHeaders)
+        {
+            var removing = new List<string>();
+
+            foreach (var headerKey in requestHeaders.Keys)
+            {
+                if (headerKey.ToLower() == key)
+                {
+                    removing.Add(headerKey);
+                }
+            }
+            foreach (var headerKey in removing)
+            {
+                if (requestHeaders.ContainsKey(headerKey))
+                {
+                    requestHeaders.Remove(headerKey);
+                }
+            }
         }
 
 
