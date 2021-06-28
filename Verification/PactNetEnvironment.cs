@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Pact.Provider.Wrapper.IO;
+using Pact.Provider.Wrapper.Models;
 using Pact.Provider.Wrapper.PactPort.RequestFilters;
 using PactNet;
 using PactNet.Infrastructure.Outputters;
-using PactNet.Mocks.MockHttpService.Models;
 using IPactVerifier = Pact.Provider.Wrapper.PactPort.IPactVerifier;
 
 namespace Pact.Provider.Wrapper.Verification
@@ -15,6 +15,7 @@ namespace Pact.Provider.Wrapper.Verification
         private string _jsonFileName;
         private string _serviceUri;
         private bool _publish;
+        private IEnumerable<RequestFilter> _filters;
 
         public PactNetEnvironment(string serviceUri, bool publish)
         {
@@ -25,16 +26,58 @@ namespace Pact.Provider.Wrapper.Verification
 
         public void AddRequestFilters(IEnumerable<RequestFilter> filters)
         {
-            //TODO: Add PactFile manipulator to implement using these filters
+            _filters = filters;
         }
 
         public List<PactnetVerificationResult> Verify(Models.Pact pact)
         {
             SilentKill();
 
-            new Json().Save(_jsonFileName, pact);
+            var updatedPact = ApplyRequestFiltersOn(pact);
+            
+            new Json().Save(_jsonFileName, updatedPact);
 
-            return new List<PactnetVerificationResult>() {VerifyUsingPactNet(_jsonFileName, _publish, pact)};
+            return new List<PactnetVerificationResult>() {VerifyUsingPactNet(_jsonFileName, _publish, updatedPact)};
+        }
+
+        private Models.Pact ApplyRequestFiltersOn(Models.Pact pact)
+        {
+            var updated = new Models.Pact();
+            
+            updated._links = pact._links?.Clone();
+            
+            updated.Consumer = new Party()
+            {
+                Name = pact.Consumer?.Name
+            };
+            updated.Metadata = new PactMetadata()
+            {
+                PactSpecification = new Specification()
+                {
+                    Version = pact.Metadata?.PactSpecification?.Version
+                }
+            };
+            updated.Provider = new Party()
+            {
+                Name = pact.Provider?.Name
+            };
+            updated.Interactions = new List<Interaction>();
+            
+            var applier = new RequestFilterApplier();
+            
+            foreach (var pactInteraction in pact.Interactions)
+            {
+                var interaction = pactInteraction;
+
+                foreach (var filter in _filters)
+                {
+                    interaction = applier.Apply(filter, interaction);
+                }
+                
+                updated.Interactions.Add(interaction);
+            }
+
+            return updated;
         }
 
         private PactnetVerificationResult VerifyUsingPactNet(string pactFile,

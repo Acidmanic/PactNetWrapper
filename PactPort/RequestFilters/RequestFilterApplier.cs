@@ -80,28 +80,31 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
         private Dictionary<string, string> QueryToDictionary(string query)
         {
             var queryData = new Dictionary<string, string>();
-            
-            var segments = query.Split(new[] {'&'}, StringSplitOptions.RemoveEmptyEntries);
 
-            for (var i = 0; i < segments.Length; i++)
+            if (!string.IsNullOrEmpty(query))
             {
-                var segment = segments[0];
-
-                var st = segment.IndexOf("=", StringComparison.Ordinal);
-
-                var key = segment;
                 
-                string value = null;
+                var segments = query.Split(new[] {'&'}, StringSplitOptions.RemoveEmptyEntries);
 
-                if (st > -1)
+                for (var i = 0; i < segments.Length; i++)
                 {
-                    key = segment.Substring(0, st);
+                    var segment = segments[0];
 
-                    value = segment.Substring(st, segment.Length - st);
+                    var st = segment.IndexOf("=", StringComparison.Ordinal);
+
+                    var key = segment;
+                
+                    string value = null;
+
+                    if (st > -1)
+                    {
+                        key = segment.Substring(0, st);
+
+                        value = segment.Substring(st, segment.Length - st);
+                    }
+                    queryData.Add(key,value);
                 }
-                queryData.Add(key,value);
             }
-
             return queryData;
         }
 
@@ -138,8 +141,7 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
                 }
             }
         }
-
-
+        
         private string TrimStart(string main, string starter)
         {
             if (main.StartsWith(starter))
