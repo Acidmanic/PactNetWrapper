@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Web;
 using Newtonsoft.Json;
 using Pact.Provider.Wrapper.Models;
 using Pact.Provider.Wrapper.PactPort.RequestFilters;
@@ -45,11 +46,11 @@ namespace Pact.Provider.Wrapper.PactPort
 
             var logs = new PactLogBuilder();
 
-            
+
             try
             {
                 interaction = ApplyRequestFilters(interaction);
-                
+
                 HttpRequestMessage request = DesignRequestForInteraction(interaction);
 
                 HttpClient client = new HttpClient {BaseAddress = new Uri(_serviceUri)};
@@ -75,8 +76,8 @@ namespace Pact.Provider.Wrapper.PactPort
         private Interaction ApplyRequestFilters(Interaction interaction)
         {
             var applier = new RequestFilterApplier();
-            
-            _filters.ForEach( filter => interaction =  applier.Apply(filter,interaction));
+
+            _filters.ForEach(filter => interaction = applier.Apply(filter, interaction));
 
             return interaction;
         }
@@ -90,14 +91,14 @@ namespace Pact.Provider.Wrapper.PactPort
                 if ((int) actual.StatusCode != expectations.Status)
                 {
                     log.Unmatched(expectations.Status, actual.StatusCode);
-                    
+
                     success = false;
                 }
             }
 
             var ruleSet = expectations.MatchingRules ?? new Dictionary<string, MatchingRule>();
 
-            success &= VerifyHeaders(ruleSet,expectations.Headers, actual.Headers, log);
+            success &= VerifyHeaders(ruleSet, expectations.Headers, actual.Headers, log);
 
             success &= VerifyBodies(ruleSet, expectations.Body, actual.Content, log);
 
@@ -127,12 +128,12 @@ namespace Pact.Provider.Wrapper.PactPort
         {
             var expectedHeaders = new DataConvert().Normalize(expectations);
             var actualHeaders = new DataConvert().Normalize(actuals);
-            
+
             var matcher = new Matcher();
 
-            return matcher.IsMatch(expectationsMatchingRules, expectedHeaders, actualHeaders,log);
+            return matcher.IsMatch(expectationsMatchingRules, expectedHeaders, actualHeaders, log);
         }
-        
+
         private KeyValuePair<string, IEnumerable<string>> SearchForKey(string findingKey,
             HttpResponseHeaders actualHeaders)
         {
@@ -153,8 +154,11 @@ namespace Pact.Provider.Wrapper.PactPort
         {
             var req = interaction.Request;
 
-            HttpRequestMessage request = new HttpRequestMessage(req.Method, req.Path);
+            var query = HttpUtility.ParseQueryString(req.Query ?? string.Empty);
 
+            var uri = req.Path +  (query.Count > 0 ? "?" + query : string.Empty);
+            
+            HttpRequestMessage request = new HttpRequestMessage(req.Method,uri);
 
             if (req.Body != null && req.Body.Count > 0)
             {
