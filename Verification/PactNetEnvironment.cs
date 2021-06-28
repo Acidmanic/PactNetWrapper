@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Pact.Provider.Wrapper.IO;
+using Pact.Provider.Wrapper.PactPort.RequestFilters;
 using PactNet;
 using PactNet.Infrastructure.Outputters;
 using PactNet.Mocks.MockHttpService.Models;
@@ -20,6 +21,11 @@ namespace Pact.Provider.Wrapper.Verification
             this._serviceUri = serviceUri;
             _jsonFileName = Guid.NewGuid().ToString() + ".json";
             _publish = publish;
+        }
+
+        public void AddRequestFilters(IEnumerable<RequestFilter> filters)
+        {
+            //TODO: Add PactFile manipulator to implement using these filters
         }
 
         public List<PactnetVerificationResult> Verify(Models.Pact pact)

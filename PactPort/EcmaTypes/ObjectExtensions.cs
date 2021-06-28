@@ -38,7 +38,7 @@ namespace System
 
         private static EcmaType GetObjectEcmaType(object o)
         {
-            var flattened = new DataConvert().Flatten(o,"");
+            var flattened = new DynamicObjectAccess().Flatten(o,"");
             
             var prototype = new ProtoType();
             

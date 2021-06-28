@@ -8,6 +8,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using Newtonsoft.Json;
 using Pact.Provider.Wrapper.Models;
+using Pact.Provider.Wrapper.PactPort.RequestFilters;
 using Pact.Provider.Wrapper.Verification;
 
 namespace Pact.Provider.Wrapper.PactPort
@@ -15,12 +16,18 @@ namespace Pact.Provider.Wrapper.PactPort
     public class DefaultPactVerifier : IPactVerifier
     {
         private readonly string _serviceUri;
+        private readonly List<RequestFilter> _filters = new List<RequestFilter>();
 
         public DefaultPactVerifier(string serviceUri)
         {
             _serviceUri = serviceUri;
         }
 
+
+        public void AddRequestFilters(IEnumerable<RequestFilter> filters)
+        {
+            _filters.AddRange(filters);
+        }
 
         public List<PactnetVerificationResult> Verify(Models.Pact pact)
         {
@@ -38,8 +45,11 @@ namespace Pact.Provider.Wrapper.PactPort
 
             var logs = new PactLogBuilder();
 
+            
             try
             {
+                interaction = ApplyRequestFilters(interaction);
+                
                 HttpRequestMessage request = DesignRequestForInteraction(interaction);
 
                 HttpClient client = new HttpClient {BaseAddress = new Uri(_serviceUri)};
@@ -62,6 +72,14 @@ namespace Pact.Provider.Wrapper.PactPort
             return result;
         }
 
+        private Interaction ApplyRequestFilters(Interaction interaction)
+        {
+            var applier = new RequestFilterApplier();
+            
+            _filters.ForEach( filter => interaction =  applier.Apply(filter,interaction));
+
+            return interaction;
+        }
 
         private bool Compare(PactResponse expectations, HttpResponseMessage actual, PactLogBuilder log)
         {
@@ -93,9 +111,9 @@ namespace Pact.Provider.Wrapper.PactPort
 
             var actualHashTable = JsonConvert.DeserializeObject<Hashtable>(actualJson);
 
-            var expectedDic = new DataConvert().Flatten(expectationsBody, "$.body");
+            var expectedDic = new DynamicObjectAccess().Flatten(expectationsBody, "$.body");
 
-            var actualDic = new DataConvert().Flatten(actualHashTable, "$.body");
+            var actualDic = new DynamicObjectAccess().Flatten(actualHashTable, "$.body");
 
             var matcher = new Matcher();
 
