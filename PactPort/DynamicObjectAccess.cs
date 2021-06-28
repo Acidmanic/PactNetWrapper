@@ -67,8 +67,8 @@ namespace Pact.Provider.Wrapper.PactPort
         {
             LoadInto(@object,data,"");
         }
-        
-        public void LoadInto(object @object, Dictionary<string, object> data,string prefix)
+
+        private void LoadInto(object @object, Dictionary<string, object> data,string prefix)
         {
             if (data != null)
             {
@@ -122,11 +122,11 @@ namespace Pact.Provider.Wrapper.PactPort
 
             if (_camelCase)
             {
-                return char.ToUpper(firstChar) + rest;
+                return char.ToLower(firstChar) + rest;
             }
             else
             {
-                return char.ToLower(firstChar) + rest;
+                return char.ToUpper(firstChar) + rest;
             }
         }
         
@@ -145,20 +145,30 @@ namespace Pact.Provider.Wrapper.PactPort
             {
                 foreach (DictionaryEntry entry in data)
                 {
+                    var keyCase = SetCase((string) entry.Key);
+                    
+                    var fullKey = (string.IsNullOrEmpty(prefix) ? "" : prefix + ".") + keyCase;
+                    
                     if (entry.Value is Hashtable)
                     {
-                        Flatten(prefix + "." + entry.Key, entry.Value as Hashtable, result);
+                        Flatten(fullKey, entry.Value as Hashtable, result);
                     }
                     else
                     {
-                        result.Add(prefix + "." + (string) entry.Key, entry.Value);
+                        result.Add(fullKey, entry.Value);
                     }
                 }
             }
         }
-        
-        private void LoadInto(Hashtable @object, Dictionary<string, object> data,string prefix)
+
+        public Hashtable LoadInto(Hashtable @object, Dictionary<string, object> data)
         {
+            return LoadInto(@object,data,"");
+        }
+        public Hashtable LoadInto(Hashtable @object, Dictionary<string, object> data,string prefix)
+        {
+            Hashtable result = new Hashtable();
+            
             if (@object != null)
             {
                 foreach (DictionaryEntry entry in @object)
@@ -169,26 +179,24 @@ namespace Pact.Provider.Wrapper.PactPort
                     
                     if (entry.Value is Hashtable childObject)
                     {
-                        LoadInto(childObject,data,key);
-
-                        child = childObject;
+                        child = LoadInto(childObject,data,key);
                     }
                     else
                     {
                         if (data.ContainsKey(key))
                         {
-                            child = data[prefix];
+                            child = data[key];
                         }
                         else
                         {
                             child = default;
                         }
-                        @object.Remove(entry.Key);
-                        
-                        @object.Add(entry.Key,child);
                     }
+                    result.Add(entry.Key,child);
                 }
             }
+
+            return result;
         }
     }
 }
