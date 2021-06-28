@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Authors>Mani Moayedi</Authors>
-    <Version>1.4.0</Version>
+    <Version>1.4.1</Version>
     <Company>Acidmanic</Company>
     <PackageIcon>graphics\pactnet-wrapper.png</PackageIcon>
     <Description>Perform Pact tests centeralized and per interaction. Publish results per endpoint and to any server or documentation tool. </Description>

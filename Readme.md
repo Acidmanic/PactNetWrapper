@@ -268,6 +268,9 @@ The Request filter builder has three methods:
  |  Request filters registered for headers manipulation, can call Put(.) method only with string or string-cast-able types.|
  |  Request filters registered for query manipulation, can call Put(.) method only with string or string-cast-able types.|
 
+ | __Note__ |
+ | :--- |
+ | Method ```WithRequestPathUnder()```, treats paths as __case-sensitive__ strings. |
 
 This code example shows registering request filters for body, header and query manipulation. But in real cases, 
 you might mostly just use header manipulation for authorization.

@@ -33,3 +33,6 @@
    * Fix: Missing query parameters on internal pact verifier.
    * Add Request Filters for request.body, request.headers and request.query.
    
+ 1.4.1
+ -----
+   * Fix: unmatched matching paths due to first char being / 

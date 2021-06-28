@@ -168,6 +168,16 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
             {
                 requestPath += "/";
             }
+            
+            if (parentPath.StartsWith("/"))
+            {
+                parentPath =  parentPath.Substring(1,parentPath.Length-1);
+            }
+
+            if (requestPath.StartsWith("/"))
+            {
+                requestPath =  requestPath.Substring(1,requestPath.Length-1);
+            }
 
             return requestPath.StartsWith(parentPath);
         }
