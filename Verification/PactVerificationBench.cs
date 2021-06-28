@@ -4,6 +4,7 @@ using Pact.Provider.Wrapper.IO;
 using Pact.Provider.Wrapper.Models;
 using Pact.Provider.Wrapper.PactnetVerificationPublish;
 using Pact.Provider.Wrapper.PactPort;
+using Pact.Provider.Wrapper.PactPort.RequestFilters;
 using Pact.Provider.Wrapper.Reflection;
 using Pact.Provider.Wrapper.Verification.Publishers;
 
@@ -13,28 +14,35 @@ namespace Pact.Provider.Wrapper.Verification
     {
         private readonly string _serviceUri;
         private BatchVerificationPublisher _publisher;
-        private Func<bool,IPactVerifier> _pactVerifierFactory;
+        private Func<bool, IPactVerifier> _pactVerifierFactory;
+        private RequestFilterCollectionBuilder _filtersBuilder;
         public IPactnetVerificationPublish PactnetVerificationPublish { get; set; }
 
         public PactVerificationBench(string serviceUri)
         {
             this._serviceUri = serviceUri;
             this.PactnetVerificationPublish = new NullPactnetVerificationPublish();
+            _filtersBuilder = new RequestFilterCollectionBuilder();
             UsePactNet();
         }
 
         public PactVerificationBench UsePactNet()
         {
-            _pactVerifierFactory = (publish) => new  PactNetEnvironment(_serviceUri,publish);
-
+            _pactVerifierFactory = (publish) => new PactNetEnvironment(_serviceUri, publish);
+            _filtersBuilder = new RequestFilterCollectionBuilder();
             return this;
         }
 
         public PactVerificationBench UseInternalPactVerifier()
         {
-            _pactVerifierFactory = _ => new  DefaultPactVerifier(_serviceUri);
+            _pactVerifierFactory = _ => new DefaultPactVerifier(_serviceUri);
 
             return this;
+        }
+
+        public RequestFilterCollectionBuilder Filters()
+        {
+            return _filtersBuilder;
         }
 
         public void Verify(string pactsDirectory)
@@ -85,13 +93,18 @@ namespace Pact.Provider.Wrapper.Verification
 
                     var verificationRecord = new VerificationRecord().UpdateFrom(singleInteraction, interaction);
 
-                    using (var pactnet = _pactVerifierFactory(publishResultViaBroker))
+                    using (var pactVerifier = _pactVerifierFactory(publishResultViaBroker))
                     {
-                        var result = pactnet.Verify(singleInteraction);
-                    
+
+                        var requestFilters = _filtersBuilder.Build();
+                        
+                        pactVerifier.AddRequestFilters(requestFilters);
+                        
+                        var result = pactVerifier.Verify(singleInteraction);
+
                         verificationRecord.UpdateFrom(result[0]);
                     }
-                    
+
                     verificationRecords.Add(verificationRecord);
                 }
             }
