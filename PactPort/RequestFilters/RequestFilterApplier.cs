@@ -38,7 +38,7 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
                 }
                 else if (filter.DataKey.StartsWith(queryKey))
                 {
-                    string dataKey = TrimStart(filter.DataKey, bodyKey);
+                    string dataKey = TrimStart(filter.DataKey, queryKey);
 
                     if (requestQueryData.ContainsKey(dataKey))
                     {
