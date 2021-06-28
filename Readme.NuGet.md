@@ -145,20 +145,14 @@ You can also use multiple Publishers together by calling the Add method in a flu
 
 That's about it. I hope it helps saving your time.
 
-Run Tests Separately
-==================
-
-In version >= 1.1.0, you can add following attributes to your test method to control 
-what 'Endpoints' are going to be considered for Contract testing:
-
-* ```[SkipAll]```: Will not test any endpoints. All other steps will be done but no endpoints
-would be tested. Its useful to check if everything is working before running tests.
-* ```[Endpoint("path/to/service")]``` This attribute will add an endpoint to be tested.
-* ```[SkipEndpoint("path/to/service")]```: This attribute will remove given endpoint from being tested.
-
+Other Feature
+===========
+ * Run Tests Separately
+ * Use Matchers
+ * Register Request Filters
 
 More Details
-============
+----
 
 For More detailed version of this readme file, please refer to [Github Page](https://github.com/Acidmanic/PactNetWrapper) for this project.
 

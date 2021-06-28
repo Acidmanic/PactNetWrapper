@@ -25,4 +25,11 @@
 -----
 
    * Issue "NullReference Exception for null/empty body response" has been fixed.
-   * NullReference exception for null MatchingRules, has been fixed. 
+   * NullReference exception for null MatchingRules, has been fixed.
+   
+   
+1.4.0
+-----
+   * Fix: Missing query parameters on internal pact verifier.
+   * Add Request Filters for request.body, request.headers and request.query.
+   

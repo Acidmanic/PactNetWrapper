@@ -222,6 +222,78 @@ I Got into some problems using PactNet with matchers at provider side's tests. S
     }
  ```
 
+
+Request Filters
+=========
+
+In Some cases, you might need to manipulate a pact interaction details, in provider side tests, just before 
+sending the request to your service endpoint. The most common use-case is when you need to put 
+a real authorization token instead of dummy/fake token coming from pact file. For that to be done, 
+Pact provides a concept called RequestFilters. Request filters will be executed like a middleware before 
+sending the request to service and the manipulate requests. This must be implemented at the provider side 
+pact-library. You can find more details on the concept [Here](https://docs.pact.io/faq/#how-do-i-test-oauth-or-other-security-headers) 
+and [Here](https://docs.pact.io/implementation_guides/go/readme/#lifecycle-of-a-provider-verification). 
+
+Using PactNet wrapper versions >= 1.4.0, you can register request filters by calling the ```WithRequestFilters()``` 
+method on ```PactVerificationBench``` object. 
+The Request filter builder has three methods:
+
+ * Put(data)
+   * this is actual data which will replace the information from pact file, for example it 
+   can be your real authorization token generated in provider side test method at runtime.
+ * At("$...")
+   * This method takes a data path, conforming with the format pact uses in its matchers. 
+   This ways you can specify, where given data should be put. This can allow to register manipulation for 
+     * Request body ("$.body.<field-name>.....<field-name>")
+     * Request Headers ("$.headers.<header-name>")
+     * Request Queries ("$.headers.<parameter-name>")
+ * WithRequestPathUnder("/")
+   * Optionally, this method declares a parent uri path. The registered filter then will be applied only 
+   on requests toward endpoints with path starting with this parent uri. By default, Filters are registered 
+   under the path "/" therefore they will be applied on all endpoints.
+     * ex:     WithRequestPathUnder("users"), will apply the filter on requests towards '/users', '/users/register', 
+     '/users/0' and etc, but will not apply on request towards 'posts/12343' or '/profiles' and so on.
+       
+ | __Note__ |
+ | :--- |
+ | Filters will not introduce new data to interactions. They only manipulate existing data which is read from Pact files. Otherwise, this would be manipulating the structure of the contract causing hard to spot bugs and failures. So ___Request Filters Only work on data which is already present in Pact file___ |
+ 
+ | __Note__ |
+ | :--- |
+ | Request Filters, Works whether you use PactNet verifier (wrapped Rubby code) or internal pact verifier. |
+
+ | __Note__ |
+ | :--- |
+ |  Request filters registered for body manipulation, can call Put(.) method with any object type matching with target field type in body object. |
+ |  Request filters registered for headers manipulation, can call Put(.) method only with string or string-cast-able types.|
+ |  Request filters registered for query manipulation, can call Put(.) method only with string or string-cast-able types.|
+
+
+This code example shows registering request filters for body, header and query manipulation. But in real cases, 
+you might mostly just use header manipulation for authorization.
+
+ ```c#
+    //...
+    // Create Test bench object
+    var bench = new PactVerificationBench("http://localhost:9222");        
+    // Configure Test bench
+    bench
+        .UseInternalPactVerifier()
+        .WithPublishers()
+        .Add(new HtmlReportVerificationPublisher("Report.html"));
+    // Use RequestFilterCollectionBuilder to register request filters.
+    bench.WithRequestFilters()
+    // Register a request filter to update Bearer authorization headers (if any present)
+        .Add().Put("Bearer eyJzdWaW.F0IjoxNTE2M.jM5MDIyfQ").At("$.headers.authorization")
+    // Register a request filter to change the value of email query parameter, if any present.
+    // This filter, will be applied only on requests towards endpoints starting with 'users/'.
+        .Add().Put("john.connor@resistance.gov").At("$.query.email").WithRequestPathUnder("users")
+    // Register a request filter to put current datetime in request body
+        .Add().Put(DateTime.Now).At("$.body.updateInformation.lastupdate")
+    ;
+```
+
+ 
 Updates
 ======
 
