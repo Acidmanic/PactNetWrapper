@@ -40,7 +40,7 @@ namespace Pact.Provider.Wrapper.Verification
             return this;
         }
 
-        public RequestFilterCollectionBuilder Filters()
+        public RequestFilterCollectionBuilder WithRequestFilters()
         {
             return _filtersBuilder;
         }
