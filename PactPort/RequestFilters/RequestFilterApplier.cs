@@ -33,7 +33,7 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
                 }
             }
             
-            new DynamicObjectAccess(true).LoadInto(requestBody,requestBodyData);
+            requestBody = new DynamicObjectAccess(true).LoadInto(requestBody,requestBodyData);
 
             interaction.Request.Body = requestBody;
 
