@@ -19,7 +19,7 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
 
             var requestQueryData = QueryToDictionary(interaction.Request.Query);
             
-            if (RequestPathMatch(filter.RequestPath, interaction.Request.Path))
+            if (filter.UrlMatcher.Matches(interaction.Request.Path))
             {
                 if (filter.DataKey.StartsWith(headersKey))
                 {
@@ -150,36 +150,6 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
             }
 
             return main;
-        }
-
-        private bool RequestPathMatch(string parentPath, string requestPath)
-        {
-            if (string.IsNullOrEmpty(parentPath) || parentPath == "/")
-            {
-                return true;
-            }
-
-            if (!parentPath.EndsWith("/"))
-            {
-                parentPath += "/";
-            }
-
-            if (!requestPath.EndsWith("/"))
-            {
-                requestPath += "/";
-            }
-            
-            if (parentPath.StartsWith("/"))
-            {
-                parentPath =  parentPath.Substring(1,parentPath.Length-1);
-            }
-
-            if (requestPath.StartsWith("/"))
-            {
-                requestPath =  requestPath.Substring(1,requestPath.Length-1);
-            }
-
-            return requestPath.StartsWith(parentPath);
         }
     }
 }

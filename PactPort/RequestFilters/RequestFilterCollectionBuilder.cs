@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Pact.Provider.Wrapper.UrlUtilities;
 
 namespace Pact.Provider.Wrapper.PactPort.RequestFilters
 {
@@ -15,7 +16,7 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
             
             _filter = new RequestFilter
             {
-                RequestPath = "",
+                UrlMatcher = new BatchUrlMatcher(),
                 DataKey = "",
                 OverrideValue = null
             };
@@ -25,10 +26,23 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
             return this;
         }
         
-        public RequestFilterCollectionBuilder WithRequestPathUnder(string path)
+        public RequestFilterCollectionBuilder WithRequestPathUnder(string path,bool caseSensitive = true)
         {
-            _filter.RequestPath = path;
-
+            if (_filter.UrlMatcher is BatchUrlMatcher batchUrlMatcher)
+            {
+                batchUrlMatcher.Add(new BySegmentUrlMatcher(path, caseSensitive, true));
+            }
+            
+            return this;
+        }
+        
+        public RequestFilterCollectionBuilder WithRequestPath(string path,bool caseSensitive = true)
+        {
+            if (_filter.UrlMatcher is BatchUrlMatcher batchUrlMatcher)
+            {
+                batchUrlMatcher.Add(new BySegmentUrlMatcher(path, caseSensitive, false));
+            }
+            
             return this;
         }
 
@@ -51,6 +65,14 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
         {
             if (_containsNotDelivered)
             {
+                if (_filter.UrlMatcher is BatchUrlMatcher batchUrlMatcher)
+                {
+                    if (batchUrlMatcher.IsEmpty())
+                    {
+                        _filter.UrlMatcher = new AllUrlMatcher();
+                    }
+                }
+                
                 _filters.Add(_filter);
                 
                 _containsNotDelivered = false;
