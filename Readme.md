@@ -253,6 +253,7 @@ The Request filter builder has three methods:
      * Request body ("$.body.<field-name>.....<field-name>")
      * Request Headers ("$.headers.<header-name>")
      * Request Queries ("$.query.<parameter-name>")
+     * Request Path ("$.path")
  * WithRequestPathUnder("/") or WithRequestPath("/")
    * Optionally, these methods allow to mark one or more url patterns, to filter which endpoints will
     be intercepted for request filtering. These methods can be called multiple times for each request 
@@ -271,6 +272,12 @@ The Request filter builder has three methods:
  |  Request filters registered for body manipulation, can call Put(.) method with any object type matching with target field type in body object. |
  |  Request filters registered for headers manipulation, can call Put(.) method only with string or string-cast-able types.|
  |  Request filters registered for query manipulation, can call Put(.) method only with string or string-cast-able types.|
+ |  Request filters registered for path manipulation, can call Put(.) method only with string or string-cast-able types.|
+
+
+ | __Note__ |
+ | :--- |
+ | Updating request path, in provider side's test, might be needed for cases that provider can not seed pre defined value for a part of url, like user id received from authorization. But use this request filter with caution!|
 
  | __Note__ |
  | :--- |

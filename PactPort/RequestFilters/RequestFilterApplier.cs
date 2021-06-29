@@ -7,11 +7,13 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
 {
     public class RequestFilterApplier
     {
+        //TODO: Use an abstraction and a factory to manage filter-appliers 
         public Interaction Apply(RequestFilter filter, Interaction interaction)
         {
             string headersKey = "$.headers.";
             string bodyKey = "$.body.";
             string queryKey = "$.query.";
+            string pathKey = "$.path";
 
             var requestBody = interaction.Request.Body;
 
@@ -43,6 +45,14 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
                     if (requestQueryData.ContainsKey(dataKey))
                     {
                         requestQueryData[dataKey] = filter.OverrideValue as string;
+                    }
+                }else if (filter.DataKey == pathKey)
+                {
+                    var path = filter.OverrideValue as string;
+
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        interaction.Request.Path = path;
                     }
                 }
             }

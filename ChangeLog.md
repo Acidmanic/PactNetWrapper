@@ -40,3 +40,7 @@
    * Add UrlMatching
    * Use UrlMatching for Endpoint/Skip attributes
    * Use UrlMatching for Filter Requests
+   
+ 1.5.1
+ -----
+   * Add request filter support for $.path 
