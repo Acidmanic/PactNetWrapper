@@ -35,27 +35,30 @@ namespace Pact.Provider.Wrapper.UrlUtilities
 
                 if (regex == null)
                 {
-                    matchers[i] = s =>
+                    if (segment.StartsWith("(") && segment.EndsWith(")"))
                     {
-                        if (caseSensitive)
+                        var expressionString = segment.Substring(1, segment.Length - 2);
+
+                        matchers[i] = s =>
                         {
-                            return s == segment;
-                        }
+                            var expression = new Regex(expressionString,
+                                caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
 
-                        return String.Equals(s, segment, StringComparison.CurrentCultureIgnoreCase);
-                    };
-                }
-                else if (segment.StartsWith("(") && segment.EndsWith(")"))
-                {
-                    var expressionString = segment.Substring(1, segment.Length - 2);
-
-                    matchers[i] = s =>
+                            return expression.IsMatch(s);
+                        };
+                    }
+                    else
                     {
-                        var expression = new Regex(expressionString,
-                            caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
+                        matchers[i] = s =>
+                        {
+                            if (caseSensitive)
+                            {
+                                return s == segment;
+                            }
 
-                        return expression.IsMatch(s);
-                    };
+                            return String.Equals(s, segment, StringComparison.CurrentCultureIgnoreCase);
+                        };   
+                    }
                 }
                 else
                 {
