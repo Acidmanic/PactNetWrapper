@@ -80,7 +80,7 @@ namespace Pact.Provider.Wrapper.UrlUtilities
 
         public bool Matches(string url)
         {
-            var segments = url.Split(new[] {'/'}, StringSplitOptions.None);
+            var segments = url.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
 
             if (segments.Length < _matchers.Length)
             {

@@ -1,17 +1,16 @@
 using System;
+using Pact.Provider.Wrapper.UrlUtilities;
 
 namespace Pact.Provider.Wrapper.Unit
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class EndpointAttribute : Attribute
+    public class EndpointAttribute : EndpointMatchAttributeBase
     {
-        private string _requestPath;
-
-        public EndpointAttribute(string requestPath)
+        public EndpointAttribute(string requestPathPattern,bool caseSensitive = true, bool acceptChildren = false)
         {
-            _requestPath = requestPath;
+            RemovingUrls = new NoneUrlMatcher();
+            
+            AddingUrls = new BySegmentUrlMatcher(requestPathPattern,caseSensitive,acceptChildren);
         }
-
-        public string RequestPath => _requestPath;
     }
 }

@@ -76,7 +76,7 @@ namespace Pact.Provider.Wrapper.Verification
 
         private void VerifyAgainst(Models.Pact pact, List<VerificationRecord> verificationRecords)
         {
-            var splitPacts = pact.SplitByEndpoint();
+            var splitPacts = pact.SplitByEndpoint(true);
 
             var selectedToTestEndpoints = new EndpointFilter().Filter(splitPacts);
 

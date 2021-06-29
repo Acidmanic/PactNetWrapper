@@ -20,22 +20,36 @@ namespace Pact.Provider.Wrapper.Reflection
                 return new Dictionary<string, T>();
             }
 
-            var addEndpoints =
-                new AttributeHelper().DeliveredAttributes<EndpointAttribute>()
-                    .Select(ep => ep.RequestPath.NormalizeHttpUri().ToLower()).ToList();
-
+            // Result
             var selected = new Dictionary<string, T>();
+            
+            var endpointMatchers = new AttributeHelper().DeliveredAttributes<EndpointMatchAttributeBase>();
+
+            // Add-1) Add endpoints per attribute
 
             foreach (var keyValuePair in existing)
             {
-                if (addEndpoints.Count == 0 || IsLabeled(keyValuePair.Key, addEndpoints))
+                if (ShouldAdd(keyValuePair.Key, endpointMatchers))
+                {
+                    if (!selected.ContainsKey(keyValuePair.Key))
+                    {
+                        selected.Add(keyValuePair.Key, keyValuePair.Value);
+                    }
+                }
+            }
+
+            // Add-All) If no endpoints has been added yet, add all endpoints for the case that no Adding Att 
+            // has been provided
+
+            if (!endpointMatchers.Any(ep => ep is EndpointAttribute))
+            {
+                foreach (var keyValuePair in existing)
                 {
                     selected.Add(keyValuePair.Key, keyValuePair.Value);
                 }
             }
 
-            var skipEndpoints = new AttributeHelper().DeliveredAttributes<SkipEndpointAttribute>()
-                .Select(ep => ep.RequestPath.NormalizeHttpUri().ToLower()).ToList();
+            // SKIP) Remove Skipped endpoints per attribute
 
             var removingKeys = new List<string>();
 
@@ -43,7 +57,7 @@ namespace Pact.Provider.Wrapper.Reflection
             {
                 var key = keyValuePair.Key.NormalizeHttpUri().ToLower();
 
-                if (skipEndpoints.Contains(key))
+                if (ShouldRemove(key, endpointMatchers))
                 {
                     removingKeys.Add(keyValuePair.Key);
                 }
@@ -57,11 +71,52 @@ namespace Pact.Provider.Wrapper.Reflection
             return selected;
         }
 
-        private bool IsLabeled(string endpoint, List<string> labeledEndpoints)
+        private bool ShouldAdd(string url, List<EndpointMatchAttributeBase> endpointMatchers)
         {
-            var key = endpoint.NormalizeHttpUri().ToLower();
+            foreach (var matcher in endpointMatchers)
+            {
+                if (matcher.AddingUrls.Matches(url))
+                {
+                    return true;
+                }
+            }
 
-            return labeledEndpoints.Count == 0 || labeledEndpoints.Contains(key);
+            return false;
         }
+
+        private bool ShouldRemove(string url, List<EndpointMatchAttributeBase> endpointMatchers)
+        {
+            foreach (var matcher in endpointMatchers)
+            {
+                if (matcher.RemovingUrls.Matches(url))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // private bool IsLabeled(string endpoint, List<string> labeledEndpoints, bool acceptChildren = false)
+        // {
+        //     var key = endpoint.NormalizeHttpUri().ToLower();
+        //
+        //     return acceptChildren
+        //         ? ContainsKeyWhichStartsGivenKey(labeledEndpoints, key)
+        //         : labeledEndpoints.Contains(key);
+        // }
+        //
+        // private bool ContainsKeyWhichStartsGivenKey(List<string> labels, string givenKey)
+        // {
+        //     foreach (var label in labels)
+        //     {
+        //         if (givenKey.StartsWith(label))
+        //         {
+        //             return true;
+        //         }
+        //     }
+        //
+        //     return false;
+        // }
     }
 }

@@ -1,17 +1,17 @@
 using System;
+using Pact.Provider.Wrapper.UrlUtilities;
 
 namespace Pact.Provider.Wrapper.Unit
 {
+    
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class SkipEndpointAttribute:Attribute
+    public class SkipEndpointAttribute : EndpointMatchAttributeBase
     {
-        private string _requestPath;
-
-        public SkipEndpointAttribute(string requestPath)
+        public SkipEndpointAttribute(string requestPathPattern,bool caseSensitive = true, bool acceptChildren = false)
         {
-            _requestPath = requestPath;
+            RemovingUrls = new BySegmentUrlMatcher(requestPathPattern,caseSensitive,acceptChildren);
+            
+            AddingUrls = new NoneUrlMatcher();
         }
-
-        public string RequestPath => _requestPath;
     }
 }
