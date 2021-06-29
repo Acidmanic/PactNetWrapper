@@ -246,7 +246,7 @@ The Request filter builder has three methods:
    This ways you can specify, where given data should be put. This can allow to register manipulation for 
      * Request body ("$.body.<field-name>.....<field-name>")
      * Request Headers ("$.headers.<header-name>")
-     * Request Queries ("$.headers.<parameter-name>")
+     * Request Queries ("$.query.<parameter-name>")
  * WithRequestPathUnder("/")
    * Optionally, this method declares a parent uri path. The registered filter then will be applied only 
    on requests toward endpoints with path starting with this parent uri. By default, Filters are registered 
