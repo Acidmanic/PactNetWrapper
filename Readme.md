@@ -192,6 +192,12 @@ other attributes.
  * __NOTE__: If a number of ```Endpoint``` attributes are present, the ```SkipAll``` attributes 
  will undo added endpoints using ```Endpoint```. 
 
+* __NOTE__: The ```'path/to/service'``` parameters, are url patterns which can be combined with 
+regular expressions. See [Url Matching](#url-matching) for more details on writing url patterns.
+ also, both ```Endpoint``` and ```SkipEndpoint``` attributes, can optionally get parameters: 
+    * acceptChildren: If true, any request path, starting with given pattern will be accepted. 
+    If false, only request paths that fully match with the pattern will be accepted.
+    * caseSensitive: effects string comparisons.  
 
 Matchers
 ================
@@ -231,7 +237,7 @@ sending the request to your service endpoint. The most common use-case is when y
 a real authorization token instead of dummy/fake token coming from pact file. For that to be done, 
 Pact provides a concept called RequestFilters. Request filters will be executed like a middleware before 
 sending the request to service and the manipulate requests. This must be implemented at the provider side 
-pact-library. You can find more details on the concept [Here](https://docs.pact.io/faq/#how-do-i-test-oauth-or-other-security-headers) 
+pact-library. You can fipath/to/servicend more details on the concept [Here](https://docs.pact.io/faq/#how-do-i-test-oauth-or-other-security-headers) 
 and [Here](https://docs.pact.io/implementation_guides/go/readme/#lifecycle-of-a-provider-verification). 
 
 Using PactNet wrapper versions >= 1.4.0, you can register request filters by calling the ```WithRequestFilters()``` 
@@ -247,12 +253,10 @@ The Request filter builder has three methods:
      * Request body ("$.body.<field-name>.....<field-name>")
      * Request Headers ("$.headers.<header-name>")
      * Request Queries ("$.query.<parameter-name>")
- * WithRequestPathUnder("/")
-   * Optionally, this method declares a parent uri path. The registered filter then will be applied only 
-   on requests toward endpoints with path starting with this parent uri. By default, Filters are registered 
-   under the path "/" therefore they will be applied on all endpoints.
-     * ex:     WithRequestPathUnder("users"), will apply the filter on requests towards '/users', '/users/register', 
-     '/users/0' and etc, but will not apply on request towards 'posts/12343' or '/profiles' and so on.
+ * WithRequestPathUnder("/") or WithRequestPath("/")
+   * Optionally, these methods allow to mark one or more url patterns, to filter which endpoints will
+    be intercepted for request filtering. These methods can be called multiple times for each request 
+    filter, allowing to collect any interactions in mind. 
        
  | __Note__ |
  | :--- |
@@ -270,7 +274,10 @@ The Request filter builder has three methods:
 
  | __Note__ |
  | :--- |
- | Method ```WithRequestPathUnder()```, treats paths as __case-sensitive__ strings. |
+ | ```WithRequestPathUnder(.)``` accepts all request paths starting with given pattern while ```WithRequestPath(.)```  only accepts exact matched request paths |
+ | Both ```WithRequestPathUnder(.)``` and ```WithRequestPath(.)```  methods can accept an argument: _caseSensitive_, determining the string comparisons. |
+ | Both ```WithRequestPathUnder(.)``` and ```WithRequestPath(.)```  methods use Url Matching rules as described [here](#url-matching). |
+
 
 This code example shows registering request filters for body, header and query manipulation. But in real cases, 
 you might mostly just use header manipulation for authorization.
@@ -296,12 +303,34 @@ you might mostly just use header manipulation for authorization.
     ;
 ```
 
- 
+Url Matching
+===========
+
+Url patterns, given to EndpointAttribute or SkipEndpointAttributes, and also Url patterns given 
+to ```WithRequestPathUnder(.)``` or ```WithRequestPath(.)``` methods for request filters, follow 
+a simple format to determine which urls are included or not.
+
+ * by default they behave as exact matchers. ```'/a/b'``` will match a request to address _/a/b_
+ * each segment can be replaced with a regular expression in parenthesis. 
+    * for example: ```'/a/([0-9]+)'``` will match _/a/0_, _/a/12384_ and will not match _/a/b_
+ * for some more common formats like id or email, you can use builtin named regular expressions, 
+ using their names in curly braces. 
+    * ex:   ```'/users/{IntegerId}'``` will match _'/users/2343/'_ or _'/users/012/'_
+    * ex:   ```'/users/{Email}'``` will match _'/users/john.connor@resistance.la/'_
+    * These are currently shipped builtin named regular expressions:
+        * __Email__: Matches email addresses  
+        * __Guid__: Matches guid strings
+        * __Time12__: Matches 12 hours time strings 
+        * __Time24__: Matches 24 hours time strings
+        * __Time__: Matches either of 24 or 12 hours time strings
+        * __IntegerId__: Matches integer numbers of any length
+        * __PhoneNumber__: Matches most formats for a phone number 
+        * __Any__: Any string, including empty string
+
 Updates
 ======
 
 You can trace changes and updates log in [Change log Document](ChangeLog.md).
-
 
 
 

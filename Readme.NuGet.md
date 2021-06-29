@@ -54,7 +54,10 @@ Other Feature
     * To Html file
     * Using Custom Publisher(s)
  * Verify Using PactNet (Rubby Wrapper) Or BuiltIn C# Pact verifier (InternalVerifier)
- 
+ * Url Matching Patterns
+    * Url Matching for Endpoint test selection
+    * Url Matching for Request Filtering
+    
 More Details
 ----
 
