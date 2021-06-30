@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -10,6 +11,7 @@ namespace Pact.Provider.Wrapper.Verification.Publishers
         private readonly string _brokerUrl;
         private readonly string _token;
         private readonly IInteractionTagger _tagger = new ColumnDelimitedInteractionTagger();
+
         public AcidmanicPactBrokerPublisher(string brokerUrl, string token)
         {
             _brokerUrl = brokerUrl;
@@ -52,8 +54,9 @@ namespace Pact.Provider.Wrapper.Verification.Publishers
 
                 if (!grouped.ContainsKey(tag))
                 {
-                    grouped.Add(tag,new List<VerificationRecord>());
+                    grouped.Add(tag, new List<VerificationRecord>());
                 }
+
                 grouped[tag].Add(record);
             }
 
@@ -62,19 +65,28 @@ namespace Pact.Provider.Wrapper.Verification.Publishers
 
         private void Publish(Dictionary<string, string> result)
         {
-            HttpClient client = new HttpClient();
+            try
+            {
+                HttpClient client = new HttpClient();
 
-            string json = JsonConvert.SerializeObject(result);
+                string json = JsonConvert.SerializeObject(result);
 
-            HttpContent content = new StringContent(json);
+                HttpContent content = new StringContent(json);
 
-            content.Headers.Clear();
+                content.Headers.Clear();
 
-            content.Headers.Add("Content-Type", "application/json");
+                content.Headers.Add("Content-Type", "application/json");
 
-            content.Headers.Add("token", this._token);
+                content.Headers.Add("token", this._token);
 
-            client.PostAsync(this._brokerUrl, content).Wait();
+                client.PostAsync(this._brokerUrl, content).Wait();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(
+                    this.GetType().Name + ": Unable to publish results because of the the following error:");
+                Console.WriteLine(e);
+            }
         }
     }
 }

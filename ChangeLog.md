@@ -44,3 +44,8 @@
  1.5.1
  -----
    * Add request filter support for $.path 
+   
+ 1.5.2
+ -----
+   * Fix Builtin Custom publisher exception (Test failure) on network errors 
+   
