@@ -48,4 +48,4 @@
  1.5.2
  -----
    * Fix Builtin Custom publisher exception (Test failure) on network errors 
-   
+   * Update Builtin publisher to publish tags both per endpoint and per interaction
