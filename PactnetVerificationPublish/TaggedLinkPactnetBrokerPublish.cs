@@ -8,16 +8,16 @@ namespace Pact.Provider.Wrapper.PactnetVerificationPublish
     {
         private static readonly string VerificationResultKey;
         private readonly string _verificationResultBrokerLink;
-        private readonly IInteractionTagger _tagger;
+        private readonly IPublicationTagger _tagger;
 
-        public TaggedLinkPactnetBrokerPublish(string verificationResultBrokerLink, IInteractionTagger tagger)
+        public TaggedLinkPactnetBrokerPublish(string verificationResultBrokerLink, IPublicationTagger tagger)
         {
             _verificationResultBrokerLink = verificationResultBrokerLink;
             _tagger = tagger;
         }
 
         public TaggedLinkPactnetBrokerPublish(string verificationResultBrokerLink)
-        :this(verificationResultBrokerLink, new ColumnDelimitedInteractionTagger())
+        :this(verificationResultBrokerLink, new ColumnDelimitedPublicationTagger())
         {
         }
 
@@ -28,7 +28,7 @@ namespace Pact.Provider.Wrapper.PactnetVerificationPublish
         
         public bool InterceptPactBeforeVerification(Models.Pact pact, Interaction runningInteraction)
         {
-            string tag = _tagger.Tag(new InteractionInfo().UpdateFrom(pact,runningInteraction));
+            string tag = _tagger.TagInteraction(new InteractionInfo().UpdateFrom(pact,runningInteraction));
             
             string link = ResolveUrl(this._verificationResultBrokerLink, tag);
 

@@ -9,14 +9,14 @@ namespace Pact.Provider.Wrapper.Verification.Publishers.HtmlReportVerificationPu
     public class SimpleTableReport : Html.Html
     {
 
-        private readonly IInteractionTagger _tagger ;
+        private readonly IPublicationTagger _tagger ;
 
         public SimpleTableReport(List<VerificationRecord> verificationRecords)
-            : this(verificationRecords, new ColumnDelimitedInteractionTagger())
+            : this(verificationRecords, new ColumnDelimitedPublicationTagger())
         {
         }
 
-        public SimpleTableReport(List<VerificationRecord> verificationRecords,IInteractionTagger tagger)
+        public SimpleTableReport(List<VerificationRecord> verificationRecords,IPublicationTagger tagger)
         {
             _tagger = tagger;
             
@@ -98,7 +98,7 @@ namespace Pact.Provider.Wrapper.Verification.Publishers.HtmlReportVerificationPu
 
             tableRow.Cells.Add(new TableCell());
 
-            string tag = _tagger.Tag(record.Interaction);
+            string tag = _tagger.TagInteraction(record.Interaction);
 
             tableRow.Cells.Add(new TableCell(
                 new Italic(new Text(tag))

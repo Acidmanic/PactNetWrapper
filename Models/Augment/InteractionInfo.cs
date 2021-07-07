@@ -13,5 +13,7 @@ namespace Pact.Provider.Wrapper.Models.Augment
         public string ConsumerName { get; set; }
         
         public int ExpectedStatusCode { get; set; }
+        
+        public string ProviderState { get; set; }
     }
 }

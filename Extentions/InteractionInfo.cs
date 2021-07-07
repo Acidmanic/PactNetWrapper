@@ -12,7 +12,7 @@ namespace Pact.Provider.Wrapper.Models.Augment
             record.RequestMethod = interaction.Request?.Method;
             record.RequestPath = interaction.Request?.Path;
             record.ExpectedStatusCode = interaction.Response.Status;
-
+            record.ProviderState = interaction.ProviderState;
             return record;
         }
 

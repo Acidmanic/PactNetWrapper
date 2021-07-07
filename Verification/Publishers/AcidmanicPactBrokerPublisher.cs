@@ -10,8 +10,9 @@ namespace Pact.Provider.Wrapper.Verification.Publishers
     {
         private readonly string _brokerUrl;
         private readonly string _token;
-        private readonly IInteractionTagger _tagger = new ColumnDelimitedInteractionTagger();
+        private readonly IPublicationTagger _tagger = new ColumnDelimitedPublicationTagger();
 
+        
         public AcidmanicPactBrokerPublisher(string brokerUrl, string token)
         {
             _brokerUrl = brokerUrl;
@@ -21,28 +22,50 @@ namespace Pact.Provider.Wrapper.Verification.Publishers
 
         public void Publish(List<VerificationRecord> verificationRecords)
         {
-            var recordsByTag = GroupByTag(verificationRecords);
-
             Dictionary<string, string> result = new Dictionary<string, string>();
 
-            foreach (var tag in recordsByTag.Keys)
-            {
-                result[tag] = "Success";
+            AddByEndpoints(verificationRecords, result);
 
-                var group = recordsByTag[tag].ToList();
-
-                foreach (var record in group)
-                {
-                    if (!record.Success)
-                    {
-                        result[tag] = "Failure";
-                        break;
-                    }
-                }
-            }
+            AddByInteractions(verificationRecords, result);
 
             Publish(result);
         }
+
+        private void AddByInteractions(List<VerificationRecord> verificationRecords, Dictionary<string,string> result)
+        {
+            foreach (var verificationRecord in verificationRecords)
+            {
+                string interactionTag = _tagger.TagInteraction(verificationRecord.Interaction);
+
+                if (result.ContainsKey(interactionTag))
+                {
+                    result.Remove(interactionTag);
+                }
+                result.Add(interactionTag,verificationRecord.Success?"Success":"Failure");
+            }
+        }
+
+        private void AddByEndpoints(List<VerificationRecord> verificationRecords, Dictionary<string, string> result)
+        {
+            Dictionary<string,bool> endpointResults = new Dictionary<string, bool>();
+            
+            foreach (var verificationRecord in verificationRecords)
+            {
+                string endpointTag = _tagger.TagEndpoint(verificationRecord.Interaction);
+
+                if (!endpointResults.ContainsKey(endpointTag))
+                {
+                    endpointResults.Add(endpointTag,true);
+                }
+                endpointResults[endpointTag] = endpointResults[endpointTag] && verificationRecord.Success;
+            }
+            
+            foreach (var keyValuePair in endpointResults)
+            {
+                result.Add(keyValuePair.Key,keyValuePair.Value?"Success":"Failure");
+            }
+        }
+
 
         private Dictionary<string, List<VerificationRecord>> GroupByTag(List<VerificationRecord> verificationRecords)
         {
@@ -50,7 +73,7 @@ namespace Pact.Provider.Wrapper.Verification.Publishers
 
             foreach (var record in verificationRecords)
             {
-                string tag = _tagger.Tag(record.Interaction);
+                string tag = _tagger.TagInteraction(record.Interaction);
 
                 if (!grouped.ContainsKey(tag))
                 {
