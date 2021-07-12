@@ -109,7 +109,10 @@ namespace Pact.Provider.Wrapper.PactPort
             {
                 return RegExMatch(actual,rule.Regex);
             }
-
+            if (expected == null)
+            {
+                return actual == null;
+            }
             return expected.Equals(actual);
         }
 
