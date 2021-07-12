@@ -8,39 +8,38 @@ namespace Pact.Provider.Wrapper.Verification.Publishers.HtmlReportVerificationPu
 {
     public class SimpleTableReport : Html.Html
     {
-
-        private readonly IPublicationTagger _tagger ;
+        private readonly IPublicationTagger _tagger;
 
         public SimpleTableReport(List<VerificationRecord> verificationRecords)
             : this(verificationRecords, new ColumnDelimitedPublicationTagger())
         {
         }
 
-        public SimpleTableReport(List<VerificationRecord> verificationRecords,IPublicationTagger tagger)
+        public SimpleTableReport(List<VerificationRecord> verificationRecords, IPublicationTagger tagger)
         {
             _tagger = tagger;
-            
+
             Head = new Head {Title = "Pact Verification Results"};
 
             AddStyles(Head);
-            
+
             var divContainer = new Div();
-            
+
             Body = new Body();
-            
+
             Body.Content.Add(divContainer);
 
             divContainer.Childs.Add(new Heading(1, new Text("Test Results.")));
-            
-            divContainer.Childs.Add( new Paragraph(new Text("Following Table shows the result os " +
-                                                             "running pact tests on backend application. each table row, " +
-                                                             "represents the result of one api endpoint. Since each endpoint" +
-                                                             " might have several interactions verified against, the end point " +
-                                                             "verification status, shows represents the success of all " +
-                                                             "interactions or failure of more than zero interactions.")));
+
+            divContainer.Childs.Add(new Paragraph(new Text("Following Table shows the result os " +
+                                                           "running pact tests on backend application. each table row, " +
+                                                           "represents the result of one api endpoint. Since each endpoint" +
+                                                           " might have several interactions verified against, the end point " +
+                                                           "verification status, shows represents the success of all " +
+                                                           "interactions or failure of more than zero interactions.")));
 
             var table = new Table {Rows = {TableHeader()}};
-            
+
             verificationRecords.ForEach(r => table.Rows.Add(Row(r)));
 
             divContainer.Childs.Add(new Paragraph(table));
@@ -82,32 +81,33 @@ namespace Pact.Provider.Wrapper.Verification.Publishers.HtmlReportVerificationPu
                             .Append("width", "70%")
                             .Append("margin", "auto")
                             .Append("margin-top", "120px")
-
                     ).Append(
-                        ".details-paragraph",new Style()
-                            .Append("font-size","0.8em")
-                            .Append("font-weight","normal")
-                            .Append("text-align","left")
-                        )
+                        ".details-paragraph", new Style()
+                            .Append("font-size", "0.8em")
+                            .Append("font-weight", "normal")
+                            .Append("text-align", "left")
+                    ).Append(
+                        ".table-cell-state", new Style()
+                            .Append("font-size", "0.7em")
+                            .Append("text-align", "left")
+                            .Append("background-color", "white")
+                            .Append("color", "black")
+                    )
             );
         }
 
         private TableRow Row(VerificationRecord record)
         {
             var tableRow = new TableRow();
-
-            tableRow.Cells.Add(new TableCell());
-
-            string tag = _tagger.TagInteraction(record.Interaction);
-
-            tableRow.Cells.Add(new TableCell(
-                new Italic(new Text(tag))
-            ).Attribute("class", "table-cell") as TableCell);
             
             tableRow.Cells.Add(new TableCell(
-                new Italic(new Text($"{record.Interaction.ConsumerName}::{record.Interaction.ProviderName}" ))
+                new Italic(new Text(record.Interaction.ProviderState))
+            ).Attribute("class", "table-cell-state") as TableCell);
+
+            tableRow.Cells.Add(new TableCell(
+                new Italic(new Text($"{record.Interaction.ConsumerName}::{record.Interaction.ProviderName}"))
             ).Attribute("class", "table-cell") as TableCell);
-            
+
             tableRow.Cells.Add(new TableCell(
                 new Italic(new Text(record.Interaction.RequestPath))
             ).Attribute("class", "table-cell") as TableCell);
@@ -117,10 +117,25 @@ namespace Pact.Provider.Wrapper.Verification.Publishers.HtmlReportVerificationPu
             tableRow.Cells.Add(new TableCell(
                 new Bold(new Text(status))
             ).Attribute("class", "table-cell table-cell-" + status.ToLower()) as TableCell);
-            
-            tableRow.Cells.Add(new TableCell(
-                new Text(ParagraphEncode(record.Logs))
-            ).Attribute("class", "table-cell details-paragraph" ) as TableCell);
+
+            var details = record.Logs;
+
+            if (string.IsNullOrEmpty(details.Trim()))
+            {
+                details = record.Success? "&#x2713;" : "&#x58;";
+                
+                tableRow.Cells.Add(new TableCell(
+                    new Bold(new Text(details))
+                ).Attribute("class", "table-cell table-cell-" + status.ToLower()) as TableCell);
+                
+            }
+            else
+            {
+                details = ParagraphEncode(details);
+                
+                tableRow.Cells.Add(new TableCell(new Text(details))
+                    .Attribute("class", "table-cell details-paragraph") as TableCell);
+            }
 
             return tableRow;
         }
@@ -135,22 +150,20 @@ namespace Pact.Provider.Wrapper.Verification.Publishers.HtmlReportVerificationPu
             }
 
             text = HttpUtility.HtmlEncode(text);
-            
+
             text = text.Replace("\n", "<br>");
 
             return text;
         }
-        
+
         private TableRow TableHeader()
         {
             var tableRow = new TableRow();
-
-            tableRow.Cells.Add(new TableCell());
-
-            tableRow.Cells.Add(new TableCell(
-                new Bold(new Text("Tag"))
-            ).Attribute("class", "table-header") as TableCell);
             
+            tableRow.Cells.Add(new TableCell(
+                new Bold(new Text("Provider State"))
+            ).Attribute("class", "table-header") as TableCell);
+
             tableRow.Cells.Add(new TableCell(
                 new Bold(new Text("Pact"))
             ).Attribute("class", "table-header") as TableCell);
@@ -158,7 +171,7 @@ namespace Pact.Provider.Wrapper.Verification.Publishers.HtmlReportVerificationPu
             tableRow.Cells.Add(new TableCell(
                 new Bold(new Text("Api Endpoint"))
             ).Attribute("class", "table-header") as TableCell);
-            
+
             tableRow.Cells.Add(new TableCell(
                 new Bold(new Text("Status"))
             ).Attribute("class", "table-header") as TableCell);
@@ -168,6 +181,5 @@ namespace Pact.Provider.Wrapper.Verification.Publishers.HtmlReportVerificationPu
             ).Attribute("class", "table-header") as TableCell);
             return tableRow;
         }
-       
     }
 }

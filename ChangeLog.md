@@ -54,3 +54,4 @@
  1.5.3
  -----
    * Fix unexpected null exception when expected value is null
+   * Improve Html Report View
