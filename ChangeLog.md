@@ -49,3 +49,8 @@
  -----
    * Fix Builtin Custom publisher exception (Test failure) on network errors 
    * Update Builtin publisher to publish tags both per endpoint and per interaction
+   
+   
+ 1.5.3
+ -----
+   * Fix unexpected null exception when expected value is null
