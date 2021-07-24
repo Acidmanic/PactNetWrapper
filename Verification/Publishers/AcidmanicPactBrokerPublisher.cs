@@ -12,7 +12,7 @@ namespace Pact.Provider.Wrapper.Verification.Publishers
         private readonly string _token;
         private readonly IPublicationTagger _tagger = new ColumnDelimitedPublicationTagger();
 
-        
+
         public AcidmanicPactBrokerPublisher(string brokerUrl, string token)
         {
             _brokerUrl = brokerUrl;
@@ -24,6 +24,8 @@ namespace Pact.Provider.Wrapper.Verification.Publishers
         {
             Dictionary<string, string> result = new Dictionary<string, string>();
 
+            AddByServices(verificationRecords, result);
+
             AddByEndpoints(verificationRecords, result);
 
             AddByInteractions(verificationRecords, result);
@@ -31,7 +33,29 @@ namespace Pact.Provider.Wrapper.Verification.Publishers
             Publish(result);
         }
 
-        private void AddByInteractions(List<VerificationRecord> verificationRecords, Dictionary<string,string> result)
+        private void AddByServices(List<VerificationRecord> verificationRecords, Dictionary<string, string> result)
+        {
+            var validations = new Dictionary<string, bool>();
+
+            foreach (var verificationRecord in verificationRecords)
+            {
+                string serviceTag = _tagger.TagService(verificationRecord.Interaction);
+
+                if (!validations.ContainsKey(serviceTag))
+                {
+                    validations.Add(serviceTag, true);
+                }
+
+                validations[serviceTag] = validations[serviceTag] && verificationRecord.Success;
+            }
+
+            foreach (var keyValuePair in validations)
+            {
+                result.Add(keyValuePair.Key, keyValuePair.Value ? "Success" : "Failure");
+            }
+        }
+
+        private void AddByInteractions(List<VerificationRecord> verificationRecords, Dictionary<string, string> result)
         {
             foreach (var verificationRecord in verificationRecords)
             {
@@ -41,28 +65,30 @@ namespace Pact.Provider.Wrapper.Verification.Publishers
                 {
                     result.Remove(interactionTag);
                 }
-                result.Add(interactionTag,verificationRecord.Success?"Success":"Failure");
+
+                result.Add(interactionTag, verificationRecord.Success ? "Success" : "Failure");
             }
         }
 
         private void AddByEndpoints(List<VerificationRecord> verificationRecords, Dictionary<string, string> result)
         {
-            Dictionary<string,bool> endpointResults = new Dictionary<string, bool>();
-            
+            Dictionary<string, bool> endpointResults = new Dictionary<string, bool>();
+
             foreach (var verificationRecord in verificationRecords)
             {
                 string endpointTag = _tagger.TagEndpoint(verificationRecord.Interaction);
 
                 if (!endpointResults.ContainsKey(endpointTag))
                 {
-                    endpointResults.Add(endpointTag,true);
+                    endpointResults.Add(endpointTag, true);
                 }
+
                 endpointResults[endpointTag] = endpointResults[endpointTag] && verificationRecord.Success;
             }
-            
+
             foreach (var keyValuePair in endpointResults)
             {
-                result.Add(keyValuePair.Key,keyValuePair.Value?"Success":"Failure");
+                result.Add(keyValuePair.Key, keyValuePair.Value ? "Success" : "Failure");
             }
         }
 

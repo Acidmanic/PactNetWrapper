@@ -1,4 +1,4 @@
-using Pact.Provider.Wrapper.Models;
+using System;
 using Pact.Provider.Wrapper.Models.Augment;
 
 namespace Pact.Provider.Wrapper.Verification
@@ -27,6 +27,24 @@ namespace Pact.Provider.Wrapper.Verification
         public string TagEndpoint(InteractionInfo interaction)
         {
             return TagUriPath(interaction.RequestPath?.ToLower());
+        }
+
+        public string TagService(InteractionInfo interaction)
+        {
+            if (!string.IsNullOrEmpty(interaction.RequestPath))
+            {
+                string[] segments = interaction.RequestPath.Split(new char[] {'/'},
+                        StringSplitOptions.RemoveEmptyEntries);
+
+                if (segments.Length > 0)
+                {
+                    if (!string.IsNullOrEmpty(segments[0]))
+                    {
+                        return segments[0].ToLower();
+                    }
+                }
+            }
+            return "";
         }
 
 

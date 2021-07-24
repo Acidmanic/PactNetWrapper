@@ -9,5 +9,7 @@ namespace Pact.Provider.Wrapper.Verification
         string TagInteraction(InteractionInfo interaction);
 
         string TagEndpoint(InteractionInfo interaction);
+
+        string TagService(InteractionInfo interaction);
     }
 }
