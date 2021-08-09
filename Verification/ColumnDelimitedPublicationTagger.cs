@@ -9,7 +9,7 @@ namespace Pact.Provider.Wrapper.Verification
         {
             string tag = TagUriPath(interaction.RequestPath?.ToLower());
 
-            var stateChars = interaction.ProviderState.ToCharArray();
+            var stateChars = interaction.ProviderState.ToLower().ToCharArray();
 
             tag += ":" + interaction.RequestMethod.Method.ToLower() + ":";
             
