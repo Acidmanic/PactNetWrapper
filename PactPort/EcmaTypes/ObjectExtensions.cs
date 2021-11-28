@@ -1,4 +1,5 @@
 using Pact.Provider.Wrapper.PactPort;
+using Pact.Provider.Wrapper.PactPort.DynamicObjectAccess;
 using Pact.Provider.Wrapper.PactPort.EcmaTypes;
 // ReSharper disable once CheckNamespace
 namespace System
@@ -38,7 +39,7 @@ namespace System
 
         private static EcmaType GetObjectEcmaType(object o)
         {
-            var flattened = new DynamicObjectAccess().Flatten(o,"");
+            var flattened = new FlatAccess().Flatten(o,"");
             
             var prototype = new ProtoType();
             

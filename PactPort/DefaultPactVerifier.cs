@@ -112,9 +112,9 @@ namespace Pact.Provider.Wrapper.PactPort
 
             var actualHashTable = JsonConvert.DeserializeObject<Hashtable>(actualJson);
 
-            var expectedDic = new DynamicObjectAccess(true).Flatten(expectationsBody, "$.body");
+            var expectedDic = new DynamicObjectAccess.FlatAccess(true).Flatten(expectationsBody, "$.body");
 
-            var actualDic = new DynamicObjectAccess(true).Flatten(actualHashTable, "$.body");
+            var actualDic = new DynamicObjectAccess.FlatAccess(true).Flatten(actualHashTable, "$.body");
 
             var matcher = new Matcher();
 

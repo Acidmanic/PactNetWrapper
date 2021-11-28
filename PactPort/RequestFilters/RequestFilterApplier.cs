@@ -17,7 +17,7 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
 
             var requestBody = interaction.Request.Body;
 
-            var requestBodyData = new DynamicObjectAccess(true).Flatten(requestBody, "");
+            var requestBodyData = new DynamicObjectAccess.FlatAccess(true).Flatten(requestBody, "");
 
             var requestQueryData = QueryToDictionary(interaction.Request.Query);
             
@@ -57,7 +57,7 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
                 }
             }
 
-            requestBody = new DynamicObjectAccess(true).LoadInto(requestBody, requestBodyData);
+            requestBody = new DynamicObjectAccess.FlatAccess(true).LoadInto(requestBody, requestBodyData);
 
             interaction.Request.Body = requestBody;
 
