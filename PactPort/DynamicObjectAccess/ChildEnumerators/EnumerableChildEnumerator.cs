@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Pact.Provider.Wrapper.PactPort.DynamicObjectAccess.ChildEnumerators
 {
-    public class EnumerableChildEnumerator:TypeSpecificChildEnumerator<IEnumerable>
+    public class EnumerableChildEnumerator : TypeSpecificChildEnumerator<IEnumerable>
     {
         protected override void EnumerateChildrenInto(IEnumerable data, Dictionary<string, object> result)
         {
@@ -11,9 +11,9 @@ namespace Pact.Provider.Wrapper.PactPort.DynamicObjectAccess.ChildEnumerators
 
             foreach (var item in data)
             {
-                var key = index.ToString();
+                var key = "[" + index.ToString() + "]";
 
-                result.Add(key,item);                    
+                result.Add(key, item);
 
                 index += 1;
             }

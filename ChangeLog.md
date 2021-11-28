@@ -57,7 +57,7 @@
    * Improve Html Report View to Show Provider state instead of tag
    
    
-1.5.8
+1.5.9
 -----
   * The Built-in publisher, now publishes overall service test result along side the results for end points and interactions
     * The first segment of rest api is considered as service name 
