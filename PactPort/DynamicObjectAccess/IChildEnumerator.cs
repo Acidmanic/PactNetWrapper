@@ -7,5 +7,7 @@ namespace Pact.Provider.Wrapper.PactPort.DynamicObjectAccess
         Dictionary<string, object> Enumerate(object data);
 
         bool Supports(object data);
+        
+        string SeparatorFromParent { get;  }
     }
 }

@@ -22,5 +22,7 @@ namespace Pact.Provider.Wrapper.PactPort.DynamicObjectAccess.ChildEnumerators
         {
             return data is TData;
         }
+
+        public virtual string SeparatorFromParent => ".";
     }
 }

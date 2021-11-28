@@ -18,5 +18,7 @@ namespace Pact.Provider.Wrapper.PactPort.DynamicObjectAccess.ChildEnumerators
                 index += 1;
             }
         }
+        
+        public override string SeparatorFromParent => "";
     }
 }

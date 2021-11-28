@@ -6,7 +6,6 @@ namespace Pact.Provider.Wrapper.PactPort.DynamicObjectAccess
     public class FlatAccess
     {
         
-        public string Separator { get; set; }
         public bool CamelCase { get; set; }
 
         private readonly ChildEnumeratorFactory _enumeratorFactory;
@@ -16,13 +15,9 @@ namespace Pact.Provider.Wrapper.PactPort.DynamicObjectAccess
         {
             
         }
-        public FlatAccess(bool camelCase):this(camelCase,".")
-        {
-        }
-        public FlatAccess(bool camelCase,string separator)
+        public FlatAccess(bool camelCase)
         {
             CamelCase = camelCase;
-            Separator = separator;
             _enumeratorFactory = new ChildEnumeratorFactory();
             _evaluatorFactory = new EvaluatorFactory();
         }
@@ -49,29 +44,23 @@ namespace Pact.Provider.Wrapper.PactPort.DynamicObjectAccess
                 
                 return;
             }
+            
+            var enumerator = _enumeratorFactory.MakeEnumerator(data);
 
-            Dictionary<string, object> rawChildren = EnumerateChildren(data);
+            var rawChildren = enumerator.Enumerate(data);
 
             foreach (var child in rawChildren)
             {
-                string key = InnerKey(prefix, child.Key);
+                string key = InnerKey(prefix, child.Key,enumerator.SeparatorFromParent);
                 
                 FlattenRecursive(child.Value,key,result);
             }
         }
 
-        private Dictionary<string, object> EnumerateChildren(object data)
+
+        private string InnerKey(string prefix, string key,string separator)
         {
-            var enumerator = _enumeratorFactory.MakeEnumerator(data);
-
-            var children = enumerator.Enumerate(data);
-
-            return children;
-        }
-
-        private string InnerKey(string prefix, string key)
-        {
-            return prefix + Separator + SetCase(key);
+            return prefix + separator + SetCase(key);
         }
 
         public void LoadInto(object @object, Dictionary<string, object> data)

@@ -14,6 +14,12 @@ namespace Pact.Provider.Wrapper.PactPort
             _content = new StringBuilder();
         }
 
+        public PactLogBuilder at(string fieldKey)
+        {
+            _content.Append("At: ").Append(fieldKey).Append("\n");
+
+            return this;
+        }
 
         public PactLogBuilder Unmatched(string expected, string actual)
         {

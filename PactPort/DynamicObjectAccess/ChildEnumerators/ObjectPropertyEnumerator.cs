@@ -40,5 +40,7 @@ namespace Pact.Provider.Wrapper.PactPort.DynamicObjectAccess.ChildEnumerators
         {
             return data != null;
         }
+
+        public string SeparatorFromParent => ".";
     }
 }
