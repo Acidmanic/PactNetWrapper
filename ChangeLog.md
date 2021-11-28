@@ -64,4 +64,5 @@
     * Fix: Lower case provider state for interaction tags
   * Refactor dynamic/flattening object access 
     * Fix: Support Enumerable(s) in managed manner
+      * Fix: Prevent adding dot for enumeratables
     * Fix: support JObject(s) in managed manner
