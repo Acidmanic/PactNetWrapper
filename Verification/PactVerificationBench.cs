@@ -16,7 +16,8 @@ namespace Pact.Provider.Wrapper.Verification
         private BatchVerificationPublisher _publisher;
         private Func<bool, IPactVerifier> _pactVerifierFactory;
         private RequestFilterCollectionBuilder _filtersBuilder;
-        private readonly Dictionary<string, Action> _settleActions;
+        private readonly Dictionary<string, Action<PactRequest>> _settleActions;
+        public Action<Exception> SettleActionExceptionListener { get; set; }
         public IPactnetVerificationPublish PactnetVerificationPublish { get; set; }
 
         public PactVerificationBench(string serviceUri)
@@ -24,7 +25,8 @@ namespace Pact.Provider.Wrapper.Verification
             this._serviceUri = serviceUri;
             this.PactnetVerificationPublish = new NullPactnetVerificationPublish();
             _filtersBuilder = new RequestFilterCollectionBuilder();
-            _settleActions = new Dictionary<string, Action>();
+            _settleActions = new Dictionary<string, Action<PactRequest>>();
+            SettleActionExceptionListener = e => { };
             UsePactNet();
         }
 
@@ -42,7 +44,7 @@ namespace Pact.Provider.Wrapper.Verification
             return this;
         }
 
-        public PactVerificationBench SettleProvider(string state, Action settleAction)
+        public PactVerificationBench SettleProvider(string state, Action<PactRequest> settleAction)
         {
             _settleActions[state] = settleAction;
 
@@ -104,13 +106,13 @@ namespace Pact.Provider.Wrapper.Verification
 
                     using (var pactVerifier = _pactVerifierFactory(publishResultViaBroker))
                     {
-
                         var requestFilters = _filtersBuilder.Build();
-                        
+
                         pactVerifier.AddRequestFilters(requestFilters);
-                        
-                        pactVerifier.SetProviderSettlement(new ProviderSettlement(_settleActions));
-                        
+
+                        pactVerifier.SetProviderSettlement(new ProviderSettlement(_settleActions,
+                            SettleActionExceptionListener));
+
                         var result = pactVerifier.Verify(singleInteraction);
 
                         verificationRecord.UpdateFrom(result[0]);

@@ -57,12 +57,16 @@
    * Improve Html Report View to Show Provider state instead of tag
    
    
-1.5.9
+1.5.8
 -----
   * The Built-in publisher, now publishes overall service test result along side the results for end points and interactions
     * The first segment of rest api is considered as service name 
     * Fix: Lower case provider state for interaction tags
   * Refactor dynamic/flattening object access 
     * Fix: Support Enumerable(s) in managed manner
-      * Fix: Prevent adding dot for enumeratables
+      * Fix: Prevent adding dot for enumerable(s)
     * Fix: support JObject(s) in managed manner
+    
+1.6.0
+-----
+  * Add Provider state actions

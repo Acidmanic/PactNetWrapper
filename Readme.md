@@ -342,8 +342,10 @@ you're initializing your test bench, you can add as many provider settle actions
 ```SettleProvider(state,settleAction)```. The first argument ```state``` is a string representing the state field of 
 the interaction from the pact file. __It Supports Regular Expressions__ so you can tolerate small changes in pact details 
 and also it makes it possible to treat similar provider states in a single settle-action.
-The PactVerifier would run your action for specified state, right before making the request towards the provider.
-
+The PactVerifier would run your action for specified state, right before making the request towards the provider. 
+The ```settleAction```, would be an ```Action<PactRequest>``` which allows you to also manipulate the request before being 
+sent to provider. In some cases it would be helpful to change the request to make the provider state happening. For example 
+for Pact interaction that states the user authentication token is wrong.  
 
 __Example:__
 
@@ -353,7 +355,7 @@ __Example:__
     var bench = new PactVerificationBench("http://localhost:9222");        
     // Configure Test bench
      bench
-        .SettleProvider(".*Test User Exists In Database.*", () => _usersServide.Add(new TestUser()))
+        .SettleProvider(".*Test User Exists In Database.*", request => _usersServide.Add(new TestUser()))
         .UseInternalPactVerifier()
         .WithPublishers()
         .Add(new HtmlReportVerificationPublisher("Report.html"));
@@ -364,8 +366,12 @@ __Example:__
  
   | __Note__ |
   | :--- |
-  | This only works with built-in PactVerifier. This feature is not currently supported for wrapped 
-  PactNet verifier since it would need to tear apart pact file per interactions and run each as a pact file with single interaction |
+  | This only works with built-in PactVerifier. This feature is not currently supported for wrapped PactNet verifier since it would need to tear apart pact file per interactions and run each as a pact file with single interaction |
+  
+  | __Note__ |
+  | :--- |
+  | The code you add in your settle actions, might throw exceptions. These exceptions are not being thrown since we are interested in exceptions from the pact test itself. But It's possible to receive theme through the ```SettleActionExceptionListener``` property of test bench. |
+    
   
 
 Updates

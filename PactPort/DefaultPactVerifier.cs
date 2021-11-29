@@ -23,9 +23,11 @@ namespace Pact.Provider.Wrapper.PactPort
         {
             _serviceUri = serviceUri;
 
-            _providerSettlement = new ProviderSettlement(new Dictionary<string, Action>());
+            _providerSettlement = new ProviderSettlement(
+                new Dictionary<string, Action<PactRequest>>(),
+                e => { });
         }
-        
+
         public void AddRequestFilters(IEnumerable<RequestFilter> filters)
         {
             _filters.AddRange(filters);
@@ -51,7 +53,7 @@ namespace Pact.Provider.Wrapper.PactPort
             PactnetVerificationResult result = new PactnetVerificationResult();
 
             var logs = new PactLogBuilder();
-            
+
             _providerSettlement.PrepareProvider(interaction);
 
             try
@@ -163,9 +165,9 @@ namespace Pact.Provider.Wrapper.PactPort
 
             var query = HttpUtility.ParseQueryString(req.Query ?? string.Empty);
 
-            var uri = req.Path +  (query.Count > 0 ? "?" + query : string.Empty);
-            
-            HttpRequestMessage request = new HttpRequestMessage(req.Method,uri);
+            var uri = req.Path + (query.Count > 0 ? "?" + query : string.Empty);
+
+            HttpRequestMessage request = new HttpRequestMessage(req.Method, uri);
 
             if (req.Body != null && req.Body.Count > 0)
             {

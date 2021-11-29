@@ -6,11 +6,12 @@ namespace Pact.Provider.Wrapper.PactPort
 {
     public class ProviderSettlement
     {
-        private readonly Dictionary<string, Action> _settleActions;
-
-        public ProviderSettlement(Dictionary<string, Action> settleActions)
+        private readonly Dictionary<string, Action<PactRequest>> _settleActions;
+        private readonly Action<Exception> _exceptionListener;
+        public ProviderSettlement(Dictionary<string, Action<PactRequest>> settleActions, Action<Exception> exceptionListener)
         {
             _settleActions = settleActions;
+            _exceptionListener = exceptionListener;
         }
 
         public void PrepareProvider(Interaction interaction)
@@ -23,9 +24,12 @@ namespace Pact.Provider.Wrapper.PactPort
                 {
                     try
                     {
-                        stateAction.Value.Invoke();
+                        stateAction.Value.Invoke(interaction.Request);
                     }
-                    catch (Exception e){ }
+                    catch (Exception e)
+                    {
+                        _exceptionListener.Invoke(e);
+                    }
                 }
             }
         }
