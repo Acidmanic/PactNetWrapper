@@ -54,11 +54,11 @@ namespace Pact.Provider.Wrapper.PactPort
 
             var logs = new PactLogBuilder();
 
-            _providerSettlement.PrepareProvider(interaction);
-
             try
             {
                 interaction = ApplyRequestFilters(interaction);
+                
+                _providerSettlement.PrepareProvider(interaction);
 
                 HttpRequestMessage request = DesignRequestForInteraction(interaction);
 
