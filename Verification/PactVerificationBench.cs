@@ -16,6 +16,7 @@ namespace Pact.Provider.Wrapper.Verification
         private BatchVerificationPublisher _publisher;
         private Func<bool, IPactVerifier> _pactVerifierFactory;
         private RequestFilterCollectionBuilder _filtersBuilder;
+        private readonly Dictionary<string, Action> _settleActions;
         public IPactnetVerificationPublish PactnetVerificationPublish { get; set; }
 
         public PactVerificationBench(string serviceUri)
@@ -23,6 +24,7 @@ namespace Pact.Provider.Wrapper.Verification
             this._serviceUri = serviceUri;
             this.PactnetVerificationPublish = new NullPactnetVerificationPublish();
             _filtersBuilder = new RequestFilterCollectionBuilder();
+            _settleActions = new Dictionary<string, Action>();
             UsePactNet();
         }
 
@@ -36,6 +38,13 @@ namespace Pact.Provider.Wrapper.Verification
         public PactVerificationBench UseInternalPactVerifier()
         {
             _pactVerifierFactory = _ => new DefaultPactVerifier(_serviceUri);
+
+            return this;
+        }
+
+        public PactVerificationBench SettleProvider(string state, Action settleAction)
+        {
+            _settleActions[state] = settleAction;
 
             return this;
         }
@@ -99,6 +108,8 @@ namespace Pact.Provider.Wrapper.Verification
                         var requestFilters = _filtersBuilder.Build();
                         
                         pactVerifier.AddRequestFilters(requestFilters);
+                        
+                        pactVerifier.SetProviderSettlement(new ProviderSettlement(_settleActions));
                         
                         var result = pactVerifier.Verify(singleInteraction);
 

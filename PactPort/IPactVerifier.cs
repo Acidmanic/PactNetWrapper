@@ -10,7 +10,8 @@ namespace Pact.Provider.Wrapper.PactPort
 
         void AddRequestFilters(IEnumerable<RequestFilter> filters);
         
-        void AddProviderStateSettleActions(Dictionary<string,Action> settleActions); 
+        void SetProviderSettlement(ProviderSettlement providerSettlement); 
+        
         List<PactnetVerificationResult> Verify(Models.Pact pact);
 
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Pact.Provider.Wrapper.IO;
 using Pact.Provider.Wrapper.Models;
+using Pact.Provider.Wrapper.PactPort;
 using Pact.Provider.Wrapper.PactPort.RequestFilters;
 using PactNet;
 using PactNet.Infrastructure.Outputters;
@@ -29,7 +30,7 @@ namespace Pact.Provider.Wrapper.Verification
             _filters = filters;
         }
 
-        public void AddProviderStateSettleActions(Dictionary<string, Action> settleActions)
+        public void SetProviderSettlement(ProviderSettlement providerSettlement)
         {
             throw new NotImplementedException("To Use provider state settling feature, please use Builtin verifier.");
         }

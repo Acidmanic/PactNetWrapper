@@ -17,11 +17,13 @@ namespace Pact.Provider.Wrapper.PactPort
         private readonly string _serviceUri;
         private readonly List<RequestFilter> _filters = new List<RequestFilter>();
 
-        private Dictionary<string, Action> _stateSettleActions;
+        private ProviderSettlement _providerSettlement;
 
         public DefaultPactVerifier(string serviceUri)
         {
             _serviceUri = serviceUri;
+
+            _providerSettlement = new ProviderSettlement(new Dictionary<string, Action>());
         }
         
         public void AddRequestFilters(IEnumerable<RequestFilter> filters)
@@ -29,25 +31,9 @@ namespace Pact.Provider.Wrapper.PactPort
             _filters.AddRange(filters);
         }
 
-        public void AddProviderStateSettleActions(Dictionary<string, Action> settleActions)
+        public void SetProviderSettlement(ProviderSettlement providerSettlement)
         {
-            _stateSettleActions = settleActions;
-        }
-        
-        private void SettleProviderAction(Interaction interaction)
-        {
-            var state = interaction.ProviderState;
-
-            if (_stateSettleActions.ContainsKey(state))
-            {
-                try
-                {
-                    _stateSettleActions[state].Invoke();
-                }
-                catch (Exception exception)
-                {
-                }
-            }
+            _providerSettlement = providerSettlement;
         }
 
         public List<PactnetVerificationResult> Verify(Models.Pact pact)
@@ -66,7 +52,7 @@ namespace Pact.Provider.Wrapper.PactPort
 
             var logs = new PactLogBuilder();
             
-            SettleProviderAction(interaction);
+            _providerSettlement.PrepareProvider(interaction);
 
             try
             {
