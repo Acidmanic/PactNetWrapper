@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -19,15 +17,37 @@ namespace Pact.Provider.Wrapper.PactPort
         private readonly string _serviceUri;
         private readonly List<RequestFilter> _filters = new List<RequestFilter>();
 
+        private Dictionary<string, Action> _stateSettleActions;
+
         public DefaultPactVerifier(string serviceUri)
         {
             _serviceUri = serviceUri;
         }
-
-
+        
         public void AddRequestFilters(IEnumerable<RequestFilter> filters)
         {
             _filters.AddRange(filters);
+        }
+
+        public void AddProviderStateSettleActions(Dictionary<string, Action> settleActions)
+        {
+            _stateSettleActions = settleActions;
+        }
+        
+        private void SettleProviderAction(Interaction interaction)
+        {
+            var state = interaction.ProviderState;
+
+            if (_stateSettleActions.ContainsKey(state))
+            {
+                try
+                {
+                    _stateSettleActions[state].Invoke();
+                }
+                catch (Exception exception)
+                {
+                }
+            }
         }
 
         public List<PactnetVerificationResult> Verify(Models.Pact pact)
@@ -45,7 +65,8 @@ namespace Pact.Provider.Wrapper.PactPort
             PactnetVerificationResult result = new PactnetVerificationResult();
 
             var logs = new PactLogBuilder();
-
+            
+            SettleProviderAction(interaction);
 
             try
             {

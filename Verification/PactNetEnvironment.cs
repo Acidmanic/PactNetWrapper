@@ -29,6 +29,13 @@ namespace Pact.Provider.Wrapper.Verification
             _filters = filters;
         }
 
+        public void AddProviderStateSettleActions(Dictionary<string, Action> settleActions)
+        {
+            throw new NotImplementedException("To Use provider state settling feature, please use Builtin verifier.");
+        }
+
+     
+
         public List<PactnetVerificationResult> Verify(Models.Pact pact)
         {
             SilentKill();
@@ -42,27 +49,21 @@ namespace Pact.Provider.Wrapper.Verification
 
         private Models.Pact ApplyRequestFiltersOn(Models.Pact pact)
         {
-            var updated = new Models.Pact();
-            
-            updated._links = pact._links?.Clone();
-            
-            updated.Consumer = new Party()
+            var updated = new Models.Pact
             {
-                Name = pact.Consumer?.Name
-            };
-            updated.Metadata = new PactMetadata()
-            {
-                PactSpecification = new Specification()
+                _links = pact._links?.Clone(),
+                Consumer = new Party() {Name = pact.Consumer?.Name},
+                Metadata = new PactMetadata()
                 {
-                    Version = pact.Metadata?.PactSpecification?.Version
-                }
+                    PactSpecification = new Specification()
+                    {
+                        Version = pact.Metadata?.PactSpecification?.Version
+                    }
+                },
+                Provider = new Party() {Name = pact.Provider?.Name},
+                Interactions = new List<Interaction>()
             };
-            updated.Provider = new Party()
-            {
-                Name = pact.Provider?.Name
-            };
-            updated.Interactions = new List<Interaction>();
-            
+
             var applier = new RequestFilterApplier();
             
             foreach (var pactInteraction in pact.Interactions)
