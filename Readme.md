@@ -334,6 +334,40 @@ a simple format to determine which urls are included or not.
         * __PhoneNumber__: Matches most formats for a phone number 
         * __Any__: Any string, including empty string
 
+Settle provider before each interaction
+-------------------
+
+This feature allows the provider pact test to prepare provider state according to what is expected in the pact file. While 
+you're initializing your test bench, you can add as many provider settle actions as you need using the method 
+```SettleProvider(state,settleAction)```. The first argument ```state``` is a string representing the state field of 
+the interaction from the pact file. __It Supports Regular Expressions__ so you can tolerate small changes in pact details 
+and also it makes it possible to treat similar provider states in a single settle-action.
+The PactVerifier would run your action for specified state, right before making the request towards the provider.
+
+
+__Example:__
+
+```c#
+    //...
+    // Create Test bench object
+    var bench = new PactVerificationBench("http://localhost:9222");        
+    // Configure Test bench
+     bench
+        .SettleProvider(".*Test User Exists In Database.*", () => _usersServide.Add(new TestUser()))
+        .UseInternalPactVerifier()
+        .WithPublishers()
+        .Add(new HtmlReportVerificationPublisher("Report.html"));
+            
+                bench.Verify("../../../../Pacts");
+
+```
+ 
+  | __Note__ |
+  | :--- |
+  | This only works with built-in PactVerifier. This feature is not currently supported for wrapped 
+  PactNet verifier since it would need to tear apart pact file per interactions and run each as a pact file with single interaction |
+  
+
 Updates
 ======
 
