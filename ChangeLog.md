@@ -67,6 +67,6 @@
       * Fix: Prevent adding dot for enumerable(s)
     * Fix: support JObject(s) in managed manner
     
-1.6.0
+1.6.1
 -----
   * Add Provider state actions
