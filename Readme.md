@@ -372,7 +372,10 @@ __Example:__
   | :--- |
   | The code you add in your settle actions, might throw exceptions. These exceptions are not being thrown since we are interested in exceptions from the pact test itself. But It's possible to receive theme through the ```SettleActionExceptionListener``` property of test bench. |
     
-  
+  | __Note__ |
+  | :--- |
+  | Request filters apply on whole endpoint which makes them more general than ProviderState which are being applied on single interaction. So Provider states would override request filters manipulations |
+      
 
 Updates
 ======
