@@ -70,3 +70,7 @@
 1.6.1
 -----
   * Add Provider state actions
+  
+ 1.6.2
+ -----
+  * Fix incorrect comparison of non-enumerable objects
