@@ -57,7 +57,7 @@ namespace Pact.Provider.Wrapper.PactPort.RequestFilters
                 }
             }
 
-            requestBody = new DynamicObjectAccess.FlatAccess(true).LoadInto(requestBody, requestBodyData);
+            interaction.Request.Body = requestBody;
 
             interaction.Request.Body = requestBody;
 

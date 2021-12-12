@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -5,6 +6,7 @@ namespace Pact.Provider.Wrapper.PactPort.DynamicObjectAccess.ChildEnumerators
 {
     public class ObjectPropertyEnumerator:IChildEnumerator
     {
+
         public Dictionary<string, object> Enumerate(object data)
         {
             var type = data.GetType();
@@ -42,5 +44,6 @@ namespace Pact.Provider.Wrapper.PactPort.DynamicObjectAccess.ChildEnumerators
         }
 
         public string SeparatorFromParent => ".";
+        
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -5,20 +6,21 @@ namespace Pact.Provider.Wrapper.PactPort.DynamicObjectAccess
 {
     public class FlatAccess
     {
-        
-        public bool CamelCase { get; set; }
+        public KeyMaker KeyMaker { get; set; }
 
-        private readonly ChildEnumeratorFactory _enumeratorFactory;
+        private readonly NodeAccessorFactory _accessorFactory;
         private readonly EvaluatorFactory _evaluatorFactory;
-        
-        public FlatAccess():this(false)
+
+        public FlatAccess() : this(false)
         {
-            
         }
+
         public FlatAccess(bool camelCase)
         {
-            CamelCase = camelCase;
-            _enumeratorFactory = new ChildEnumeratorFactory();
+            KeyMaker = new KeyMaker(camelCase);
+
+            _accessorFactory = new NodeAccessorFactory();
+
             _evaluatorFactory = new EvaluatorFactory();
         }
 
@@ -34,135 +36,112 @@ namespace Pact.Provider.Wrapper.PactPort.DynamicObjectAccess
 
         private void FlattenRecursive(object data, string prefix, Dictionary<string, object> result)
         {
-            var evaluator = _evaluatorFactory.MakeEnumerator(data);
+            var evaluator = _evaluatorFactory.Make(data);
 
             if (evaluator.IsFlatEnough(data))
             {
                 var value = evaluator.Evaluate(data);
-                
-                result.Add(prefix,value);
-                
+
+                result.Add(prefix, value);
+
                 return;
             }
-            
-            var enumerator = _enumeratorFactory.MakeEnumerator(data);
 
-            var rawChildren = enumerator.Enumerate(data);
+            var accessor = _accessorFactory.Make(data);
+
+            accessor.Wrap(data, data.GetType(), KeyMaker);
+
+            var rawChildren = accessor.GetChildren();
 
             foreach (var child in rawChildren)
             {
-                string key = InnerKey(prefix, child.Key,enumerator.SeparatorFromParent);
-                
-                FlattenRecursive(child.Value,key,result);
+                string key = KeyMaker.MakePath(prefix, child, accessor.SeparatorFromParent);
+
+                var value = accessor.GetChild(child);
+
+                FlattenRecursive(value, key, result);
             }
         }
 
-
-        private string InnerKey(string prefix, string key,string separator)
-        {
-            return prefix + separator + SetCase(key);
-        }
-
-        public void LoadInto(object @object, Dictionary<string, object> data)
-        {
-            LoadInto(@object, data, "");
-        }
-
-        private void LoadInto(object @object, Dictionary<string, object> data, string prefix)
-        {
-            if (data != null)
-            {
-                var properties = data.GetType().GetProperties();
-
-                foreach (var property in properties)
-                {
-                    var type = property.PropertyType;
-
-                    if (type.IsPrimitive)
-                    {
-                        if (property.CanWrite && data.ContainsKey(prefix))
-                        {
-                            var value = data[prefix];
-
-                            property.SetValue(@object, value);
-                        }
-                    }
-                    else
-                    {
-                        if (property.CanRead)
-                        {
-                            var childObject = property.GetValue(@object);
-
-                            var name = SetCase(property.Name);
-
-                            var key = (prefix.Length > 0 ? prefix + "." : "") + name;
-
-                            LoadInto(childObject, data, key);
-
-                            if (property.CanWrite)
-                            {
-                                property.SetValue(@object, childObject);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        private string SetCase(string id)
-        {
-            if (string.IsNullOrEmpty(id) || id.Length == 1)
-            {
-                return id;
-            }
-
-            char firstChar = id.ToCharArray()[0];
-
-            string rest = id.Substring(1, id.Length - 1);
-
-            if (CamelCase)
-            {
-                return char.ToLower(firstChar) + rest;
-            }
-            else
-            {
-                return char.ToUpper(firstChar) + rest;
-            }
-        }
-
-        public Hashtable LoadInto(Hashtable @object, Dictionary<string, object> data, string prefix = "")
-        {
-            Hashtable result = new Hashtable();
-
-            if (@object != null)
-            {
-                foreach (DictionaryEntry entry in @object)
-                {
-                    object child;
-
-                    var key = (prefix.Length > 0 ? prefix + "." : "") + entry.Key;
-
-                    if (entry.Value is Hashtable childObject)
-                    {
-                        child = LoadInto(childObject, data, key);
-                    }
-                    else
-                    {
-                        if (data.ContainsKey(key))
-                        {
-                            child = data[key];
-                        }
-                        else
-                        {
-                            child = default;
-                        }
-                    }
-
-                    result.Add(entry.Key, child);
-                }
-            }
-
-            return result;
-        }
+        // public void LoadInto(object @object, Dictionary<string, object> data)
+        // {
+        //     LoadInto(@object, data, "");
+        // }
+        //
+        // private void LoadInto(object @object, Dictionary<string, object> data, string prefix)
+        // {
+        //     if (data != null)
+        //     {
+        //         var properties = @object.GetType().GetProperties();
+        //
+        //         foreach (var property in properties)
+        //         {
+        //             var type = property.PropertyType;
+        //
+        //             if (type.IsPrimitive)
+        //             {
+        //                 if (property.CanWrite && data.ContainsKey(prefix))
+        //                 {
+        //                     var value = data[prefix];
+        //
+        //                     property.SetValue(@object, value);
+        //                 }
+        //             }
+        //             else
+        //             {
+        //                 if (property.CanRead)
+        //                 {
+        //                     var childObject = property.GetValue(@object);
+        //
+        //                     var name = SetCase(property.Name);
+        //
+        //                     var key = InnerKey(prefix, name, ".");
+        //
+        //                     LoadInto(childObject, data, key);
+        //
+        //                     if (property.CanWrite)
+        //                     {
+        //                         property.SetValue(@object, childObject);
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+        //
+        // public Hashtable LoadInto(Hashtable @object, Dictionary<string, object> data, string prefix = "")
+        // {
+        //     Hashtable result = new Hashtable();
+        //
+        //     if (@object != null)
+        //     {
+        //         foreach (DictionaryEntry entry in @object)
+        //         {
+        //             object child;
+        //
+        //             var key = (prefix.Length > 0 ? prefix + "." : "") + entry.Key;
+        //
+        //             if (entry.Value is Hashtable childObject)
+        //             {
+        //                 child = LoadInto(childObject, data, key);
+        //             }
+        //             else
+        //             {
+        //                 if (data.ContainsKey(key))
+        //                 {
+        //                     child = data[key];
+        //                 }
+        //                 else
+        //                 {
+        //                     child = default;
+        //                 }
+        //             }
+        //
+        //             result.Add(entry.Key, child);
+        //         }
+        //     }
+        //
+        //     return result;
+        // }
     }
 }

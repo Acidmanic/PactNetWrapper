@@ -242,8 +242,9 @@ and [Here](https://docs.pact.io/implementation_guides/go/readme/#lifecycle-of-a-
 
 Using PactNet wrapper versions >= 1.4.0, you can register request filters by calling the ```WithRequestFilters()``` 
 method on ```PactVerificationBench``` object. 
-The Request filter builder has three methods:
-
+The Request filter builder has four methods:
+ * Add()
+   * This will create a new Request filter, __DO NOT FORGET CALLING ADD BEFORE CREATING EACH FILTER__. even on the first one.
  * Put(data)
    * this is actual data which will replace the information from pact file, for example it 
    can be your real authorization token generated in provider side test method at runtime.

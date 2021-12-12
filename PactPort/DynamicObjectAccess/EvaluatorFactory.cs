@@ -13,7 +13,7 @@ namespace Pact.Provider.Wrapper.PactPort.DynamicObjectAccess
             new PrimitiveEvaluator(), 
         };
         
-        public IEvaluator MakeEnumerator(object data)
+        public IEvaluator Make(object data)
         {
 
             for (var i = 0; i < Enumerators.Length; i++)
