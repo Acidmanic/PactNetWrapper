@@ -36,6 +36,11 @@ namespace Pact.Provider.Wrapper.PactPort.DynamicObjectAccess
 
         private void FlattenRecursive(object data, string prefix, Dictionary<string, object> result)
         {
+            if (data is null)
+            {
+                return;
+            }
+            
             var evaluator = _evaluatorFactory.Make(data);
 
             if (evaluator.IsFlatEnough(data))

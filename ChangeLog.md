@@ -74,3 +74,7 @@
  1.6.2
  -----
   * Fix incorrect comparison of non-enumerable objects
+  
+ 1.6.3
+ -----
+  * Handle Null contents in response
