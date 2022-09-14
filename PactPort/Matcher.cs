@@ -78,7 +78,7 @@ namespace Pact.Provider.Wrapper.PactPort
                 {
                     match = false;
 
-                    log.at(expectedKey).NotFound(expectedKey);
+                    log.NotFound(expectedKey);
                 }
                 else
                 {
@@ -90,7 +90,7 @@ namespace Pact.Provider.Wrapper.PactPort
                     {
                         match = false;
 
-                        log.at(expectedKey).Unmatched(expectedValue, actualValue, rule);
+                        log.At(expectedKey).Unmatched(expectedValue, actualValue, rule);
                         
                     }
                 }

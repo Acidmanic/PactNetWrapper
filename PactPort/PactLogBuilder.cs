@@ -14,7 +14,7 @@ namespace Pact.Provider.Wrapper.PactPort
             _content = new StringBuilder();
         }
 
-        public PactLogBuilder at(string fieldKey)
+        public PactLogBuilder At(string fieldKey)
         {
             _content.Append("At: ").Append(fieldKey).Append("\n");
 
@@ -74,7 +74,7 @@ namespace Pact.Provider.Wrapper.PactPort
         
         public PactLogBuilder NotFound(string key)
         {
-            Unmatched(key, "Nothing");
+            Unmatched("A value At: " + key, "Nothing");
 
             return this;
         }
