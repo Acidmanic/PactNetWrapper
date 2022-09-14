@@ -78,3 +78,9 @@
  1.6.3
  -----
   * Handle Null contents in response
+  
+  
+ 1.6.4
+ -----
+  * Handle non-uniq tags for publishing 
+  
