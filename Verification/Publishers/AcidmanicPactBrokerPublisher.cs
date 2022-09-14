@@ -51,8 +51,28 @@ namespace Pact.Provider.Wrapper.Verification.Publishers
 
             foreach (var keyValuePair in validations)
             {
-                result.Add(keyValuePair.Key, keyValuePair.Value ? "Success" : "Failure");
+                AddConsideringNotUniqueTags(keyValuePair.Key, keyValuePair.Value, result);
             }
+        }
+
+        /// <summary>
+        /// This method will add a tag into the results, but first checks if the tag already exists,
+        /// the result would be the logical AND of existing and incoming values  
+        /// </summary>
+        private void AddConsideringNotUniqueTags(string tag, bool success, Dictionary<string, string> result)
+        {
+            var overallSuccess = success;
+
+            if (result.ContainsKey(tag))
+            {
+                var existing = result[tag] == "Success";
+
+                overallSuccess &= existing;
+
+                result.Remove(tag);
+            }
+
+            result.Add(tag, overallSuccess ? "Success" : "Failure");
         }
 
         private void AddByInteractions(List<VerificationRecord> verificationRecords, Dictionary<string, string> result)
@@ -65,8 +85,7 @@ namespace Pact.Provider.Wrapper.Verification.Publishers
                 {
                     result.Remove(interactionTag);
                 }
-
-                result.Add(interactionTag, verificationRecord.Success ? "Success" : "Failure");
+                AddConsideringNotUniqueTags(interactionTag, verificationRecord.Success, result);
             }
         }
 
@@ -88,7 +107,7 @@ namespace Pact.Provider.Wrapper.Verification.Publishers
 
             foreach (var keyValuePair in endpointResults)
             {
-                result.Add(keyValuePair.Key, keyValuePair.Value ? "Success" : "Failure");
+                AddConsideringNotUniqueTags(keyValuePair.Key, keyValuePair.Value, result);
             }
         }
 
