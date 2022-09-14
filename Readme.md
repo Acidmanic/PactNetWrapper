@@ -131,12 +131,8 @@ Use Html Publisher
 
 Use a Custom Publisher
 -------------------
-You can implement the interface ```IVerificationPublisher```, and use it for publishing verification results. 
-I have my own implementation named: __AcidmanicPactBrokerPublisher__, which takes an address and a token in 
-its constructor. Where the address points to where I host my broker. my [broker](https://github.com/Acidmanic/pactbroker-server) 
-Also needs a token to communicate, which is also passed to the constructor. 
 
-(In real case scenario, to prevent putting passwords in code, i take it from environment variables, which is useful when you are running your tests in cicd pipelines)    
+You can implement the interface ```IVerificationPublisher```, and use it for publishing verification results. 
 
 ```c#
     // Unit test method based on exceptions like xUnit (with [Fact] attribute or NUnit or etc...
@@ -160,6 +156,67 @@ Also needs a token to communicate, which is also passed to the constructor.
     }
  ```
 
+I have my own implementation named:```AcidmanicPactBrokerPublisher```, which takes an broker-address and a token in 
+its constructor. Where the address points to where I host my broker. my [broker](https://github.com/Acidmanic/pactbroker-server) 
+Also needs a token to communicate, which is also passed to the constructor. 
+
+(In real case scenario, to prevent putting passwords in code, i take it from environment variables, which is useful when you are running your tests in cicd pipelines)    
+
+This publisher is able to publish results per-endpoint AND per-service (resource-name) and per interaction (based on provider state). 
+ You can also implement your own badge broker server to receive published results from this publisher. For a performed verification,  
+ it will publish results as an object with this structure:
+ 
+ ```json
+    {
+      "<tag-string>": "<result-string>",
+      "<tag-string>": "<result-string>",
+      ....
+    }
+``` 
+
+where &lt;tag-string&gt; is a tag generated to be unique for the specific result (for example an interaction verification),
+ and &lt;result-string&gt; is either the value "Success" or "Failure".
+ 
+ The result for each interaction comes directly from PACT tests verifying actual responses for each interaction against expectations 
+ for that specific interaction. The results for each Endpoint are the result of logical __AND__ over all interactions under that endpoint. 
+ In a same way, The results for each Service are the result of logical __AND__ over all interactions towards that resource.
+ 
+ Tags are being generated for each result following these rules:
+ 
+ * For an endpoint: endpoint:&lt;column-delimited-uri&gt;
+    * It Omits the provider state
+    * It Omits the http method
+ * For a service: service:&lt;resource-name&gt;
+    * It Omits the provider state
+    * It Omits the http method
+    * It Omits the uri based on service name
+ * For an interaction: interaction:&lt;column-delimited-uri&gt;:&lt;http-method&gt;:&lt;normalized-provider-state&gt;
+    * It Uses all information to specifically points to the exact interaction
+    
+ * &lt;column-delimited-uri&gt; is the request uri, that all it's slash and back slashes are replaced with a column  character (:)
+ * &lt;resource-name&gt; is the first segment of the request uri
+ * &lt;http-method&gt; is the http method specified in the request
+ * &lt;normalized-provider-state&gt; is provider state string for that interaction but only digits and alphabetical characters are kept
+ 
+ For example, consider a pact with this interaction:
+ * Method: POST
+ * towards the uri: 'users/125'
+ * provider state:  'the user with id = 125 and username @fireman, exists in the database.'
+ 
+a successful verification for this result delivered to ```AcidmanicPactBrokerPublisher```, will cause this publisher
+ to generate this json:
+ 
+ ```json
+    {
+      "service:users": "Success",
+      "endpoint:users:125": "Success",
+      "interaction:users:125:get:theuserwithid125andusernamefiremanexistsinthedadabase": "Success"
+    } 
+```
+This object then will be send (POST) as a json payload towards the broker-address received from constructor, having 
+the token added in headers with the key token. 
+
+ 
 
 You can also use multiple Publishers together by calling the Add method in a fluent syntax fashion.
 
