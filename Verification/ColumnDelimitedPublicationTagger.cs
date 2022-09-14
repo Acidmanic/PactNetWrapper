@@ -12,7 +12,7 @@ namespace Pact.Provider.Wrapper.Verification
             var stateChars = interaction.ProviderState.ToLower().ToCharArray();
 
             tag += ":" + interaction.RequestMethod.Method.ToLower() + ":";
-            
+
             foreach (char c in stateChars)
             {
                 if (char.IsDigit(c) || char.IsLetter(c))
@@ -21,12 +21,12 @@ namespace Pact.Provider.Wrapper.Verification
                 }
             }
 
-            return tag;
+            return "interaction:" + tag;
         }
 
         public string TagEndpoint(InteractionInfo interaction)
         {
-            return TagUriPath(interaction.RequestPath?.ToLower());
+            return "endpoint:" + TagUriPath(interaction.RequestPath?.ToLower());
         }
 
         public string TagService(InteractionInfo interaction)
@@ -34,17 +34,18 @@ namespace Pact.Provider.Wrapper.Verification
             if (!string.IsNullOrEmpty(interaction.RequestPath))
             {
                 string[] segments = interaction.RequestPath.Split(new char[] {'/'},
-                        StringSplitOptions.RemoveEmptyEntries);
+                    StringSplitOptions.RemoveEmptyEntries);
 
                 if (segments.Length > 0)
                 {
                     if (!string.IsNullOrEmpty(segments[0]))
                     {
-                        return segments[0].ToLower();
+                        return "service:" +segments[0].ToLower();
                     }
                 }
             }
-            return "";
+
+            return "service:root-resource";
         }
 
 
