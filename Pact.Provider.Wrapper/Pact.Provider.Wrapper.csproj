@@ -20,11 +20,11 @@
 
   <ItemGroup>
     <!-- NuGet -->
-    <None Include="Graphics\pactnet-wrapper.png">
+    <None Include="..\Graphics\pactnet-wrapper.png">
       <Pack>true</Pack>
       <PackagePath>\graphics</PackagePath>
     </None>
-    <None Include="LICENSE.txt">
+    <None Include="..\LICENSE.txt">
       <Pack>true</Pack>
       <PackagePath>LICENSE.txt</PackagePath>
     </None>

@@ -1,0 +1,15 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=3e6f6323_002D0213_002D4ebd_002D80e3_002Dc6d1b8d40e9d/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="MatcherShouldMatchIdenticalDataWithSubArrays" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;xUnit::519A18AB-A2F8-4E4E-B264-6A4F5660052D::.NETCoreApp,Version=v3.1::Pact.Provider.UnitTests.DynamicObjectAccessTests&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=a7e3dce3_002Df1a2_002D473b_002Da3fd_002D58cd167d09b4/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="FlatAccessMustReConstructSameObject" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;xUnit::519A18AB-A2F8-4E4E-B264-6A4F5660052D::.NETCoreApp,Version=v3.1::Pact.Provider.UnitTests.FlatAccessTests&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::519A18AB-A2F8-4E4E-B264-6A4F5660052D::.NETCoreApp,Version=v3.1::Pact.Provider.UnitTests.MatcherTests.MatcherMustMatchEnumeratorsAndIntegers&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::519A18AB-A2F8-4E4E-B264-6A4F5660052D::.NETCoreApp,Version=v3.1::Pact.Provider.UnitTests.MatcherTests.MatcherMustMatchEnumeratorAndIntegerInClass&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
+&lt;/SessionState&gt;</s:String>
+	<s:Boolean x:Key="/Default/ResxEditorPersonal/CheckedGroups/=Pact_002EProvider_002EUnitTests_002FDynamicObjectAccessResources/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/ResxEditorPersonal/Initialized/@EntryValue">True</s:Boolean></wpf:ResourceDictionary>
