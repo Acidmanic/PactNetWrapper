@@ -57,12 +57,12 @@ namespace Pact.Provider.Wrapper.PactPort
             try
             {
                 interaction = ApplyRequestFilters(interaction);
-                
+
                 _providerSettlement.PrepareProvider(interaction);
 
                 HttpRequestMessage request = DesignRequestForInteraction(interaction);
 
-                HttpClient client = new HttpClient {BaseAddress = new Uri(_serviceUri)};
+                HttpClient client = new HttpClient { BaseAddress = new Uri(_serviceUri) };
 
                 var response = client.SendAsync(request).Result;
 
@@ -97,7 +97,7 @@ namespace Pact.Provider.Wrapper.PactPort
 
             if (expectations.Status != 0)
             {
-                if ((int) actual.StatusCode != expectations.Status)
+                if ((int)actual.StatusCode != expectations.Status)
                 {
                     log.Unmatched(expectations.Status, actual.StatusCode);
 
@@ -180,9 +180,12 @@ namespace Pact.Provider.Wrapper.PactPort
                 request.Content = content;
             }
 
-            foreach (var keyValuePair in req.Headers)
+            if (req.Headers != null)
             {
-                request.Headers.TryAddWithoutValidation(keyValuePair.Key, keyValuePair.Value);
+                foreach (var keyValuePair in req.Headers)
+                {
+                    request.Headers.TryAddWithoutValidation(keyValuePair.Key, keyValuePair.Value);
+                }
             }
 
             return request;
