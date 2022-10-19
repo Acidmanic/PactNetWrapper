@@ -80,7 +80,8 @@
   * Handle Null contents in response
   
   
- 1.6.4
+ 1.6.5
  -----
-  * Handle non-uniq tags for publishing 
+  * Handle non-uniq tags for publishing
+  * Fix issue with null headers in pact files
   

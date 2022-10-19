@@ -15,6 +15,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pacts", "Pacts", "{DD7902CD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pact.Provider.UnitTests", "Pact.Provider.UnitTests\Pact.Provider.UnitTests.csproj", "{519A18AB-A2F8-4E4E-B264-6A4F5660052D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentations", "Documentations", "{1A34FED7-BAC9-45F8-8A19-065393C86EC2}"
+	ProjectSection(SolutionItems) = preProject
+		Readme.NuGet.md = Readme.NuGet.md
+		Readme.md = Readme.md
+		ChangeLog.md = ChangeLog.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
