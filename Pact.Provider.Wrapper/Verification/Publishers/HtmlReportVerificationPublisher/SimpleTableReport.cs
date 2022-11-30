@@ -92,6 +92,23 @@ namespace Pact.Provider.Wrapper.Verification.Publishers.HtmlReportVerificationPu
                             .Append("text-align", "left")
                             .Append("background-color", "white")
                             .Append("color", "black")
+                    ).Append(".method",new Style()
+                        .Append("font-style","bold")
+                        .Append("border-radius","32px")
+                        .Append("padding","8px")
+                        .Append("font-size","0.9em")
+                    ).Append(".method-get", new Style()
+                        .Append("background-color","#7ec552")
+                    ).Append(".method-post", new Style()
+                        .Append("background-color","#3053a3")
+                        .Append("color","white")
+                    ).Append(".method-put", new Style()
+                        .Append("background-color","#958bad")
+                    ).Append(".method-delete", new Style()
+                        .Append("background-color","#bf4242")
+                        .Append("color","white")
+                    ).Append("body",new Style()
+                        .Append("font-family","system-ui")
                     )
             );
         }
@@ -107,6 +124,16 @@ namespace Pact.Provider.Wrapper.Verification.Publishers.HtmlReportVerificationPu
             tableRow.Cells.Add(new TableCell(
                 new Italic(new Text($"{record.Interaction.ConsumerName}::{record.Interaction.ProviderName}"))
             ).Attribute("class", "table-cell") as TableCell);
+
+            var method = record.Interaction.RequestMethod.Method;
+
+
+            var methodSpan = new Span();
+            methodSpan.Childs.Add(new Text(method.ToUpper()));
+            methodSpan.Attribute("class", "method method-" + method.ToLower());
+            
+            tableRow.Cells.Add(new TableCell(methodSpan)
+                .Attribute("class", "table-cell") as TableCell);
 
             tableRow.Cells.Add(new TableCell(
                 new Italic(new Text(record.Interaction.RequestPath))
@@ -166,6 +193,10 @@ namespace Pact.Provider.Wrapper.Verification.Publishers.HtmlReportVerificationPu
 
             tableRow.Cells.Add(new TableCell(
                 new Bold(new Text("Pact"))
+            ).Attribute("class", "table-header") as TableCell);
+            
+            tableRow.Cells.Add(new TableCell(
+                new Bold(new Text("Method"))
             ).Attribute("class", "table-header") as TableCell);
 
             tableRow.Cells.Add(new TableCell(

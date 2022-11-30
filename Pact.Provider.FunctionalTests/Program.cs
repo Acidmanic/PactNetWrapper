@@ -8,7 +8,7 @@ namespace Pact.Provider.FunctionalTests
         
         static void Main(string[] args)
         {
-            new NullHeaderTest().Main();
+            new TableReportTest().Main();
         }
         
     }
